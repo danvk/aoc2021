@@ -33,6 +33,7 @@ func main() {
 	scanner := bufio.NewScanner(file)
 	pos := 0
 	depth := 0
+	aim := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Split(line, " ")
@@ -48,10 +49,11 @@ func main() {
 
 		if dir == "forward" {
 			pos += dist
+			depth += aim * dist
 		} else if dir == "down" {
-			depth += dist
+			aim += dist
 		} else if dir == "up" {
-			depth -= dist
+			aim -= dist
 		}
 	}
 
