@@ -2,6 +2,16 @@
 
 ## Advent of Code
 
+### Day 3
+
+The distinction between chars and bytes is a bit annoying. I got tripped up by doing:
+
+    int(str[pos])
+
+which gives you the ASCII value of the byte at that pos, rather than parsing it as a number. So `int('0')` --> `48` rather than `0`.
+
+Factoring out `mostCommonBitAtPos` and `filterByBit` functions made part two easier to think about. I'm starting to get to the point where I'm curious how a Go expert would do this.
+
 ### Day 2
 
 Introduces some string parsing. In Rust I would have set up an enum to represent the movements, and in TypeScript I'd set up a union type. I guess I could have set up a `struct` in Go since the moves all have the same shape.
