@@ -8,18 +8,37 @@ import (
 	"strconv"
 )
 
-func calcSums(nums []int, n int) []int {
-	sum := 0
-	for i := 0; i < n; i++ {
-		sum += nums[i]
+func mostCommonBitAtPos(nums *[]string, pos int) int {
+	counts := []int{0, 0}
+	for _, num := range *nums {
+		d := num[pos] - '0'
+		counts[d] += 1
 	}
 
-	sums := []int{sum}
-	for i := n; i < len(nums); i++ {
-		sums = append(sums, sums[len(sums)-1]+nums[i]-nums[i-n])
+	zeros := counts[0]
+	ones := counts[1]
+	if zeros > ones {
+		return 0
+	} else if ones > zeros {
+		return 1
 	}
+	return -1 // tie
+}
 
-	return sums
+func filterByBit(nums *[]string, pos int, bit int) []string {
+	result := make([]string, 0)
+	var c byte
+	if bit == 0 {
+		c = '0'
+	} else {
+		c = '1'
+	}
+	for _, num := range *nums {
+		if num[pos] == c {
+			result = append(result, num)
+		}
+	}
+	return result
 }
 
 func main() {
@@ -30,54 +49,52 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	counts := make([][]int, 0)
+	nums := []string{}
 	for scanner.Scan() {
 		line := scanner.Text()
-		if len(counts) == 0 {
-			for range line {
-				counts = append(counts, []int{0, 0})
-			}
-		}
-
-		for i, char := range line {
-			d, err := strconv.Atoi(string(char))
-			if err != nil {
-				log.Fatal(err)
-			}
-			counts[i][d] += 1
-		}
+		nums = append(nums, line)
 	}
 
-	gamma := ""
-	epsilon := ""
-	for i, digitCounts := range counts {
-		zeros := digitCounts[0]
-		ones := digitCounts[1]
-
-		if zeros > ones {
-			gamma += "0"
-			epsilon += "1"
-		} else if ones > zeros {
-			gamma += "1"
-			epsilon += "0"
-		} else {
-			log.Fatalf("Tie at position %d: %v", i, digitCounts)
+	oxygenRatingSet := nums
+	for pos := range nums[0] {
+		// fmt.Printf("nums[0]: %s, pos: %d", nums[0], pos)
+		mostCommon := mostCommonBitAtPos(&oxygenRatingSet, pos)
+		if mostCommon == -1 {
+			mostCommon = 1
+		}
+		oxygenRatingSet = filterByBit(&oxygenRatingSet, pos, mostCommon)
+		if len(oxygenRatingSet) == 1 {
+			break
 		}
 	}
+	oxygenSetRating := oxygenRatingSet[0]
 
-	fmt.Printf("gamma: %s\n", gamma)
-	fmt.Printf("espilon: %s\n", epsilon)
+	co2ScrubberSet := nums
+	for pos := range nums[0] {
+		mostCommon := mostCommonBitAtPos(&co2ScrubberSet, pos)
+		leastCommon := 1 - mostCommon
+		if mostCommon == -1 {
+			leastCommon = 0
+		}
+		co2ScrubberSet = filterByBit(&co2ScrubberSet, pos, leastCommon)
+		if len(co2ScrubberSet) == 1 {
+			break
+		}
+	}
+	co2ScrubberRating := co2ScrubberSet[0]
 
-	gammaD, err := strconv.ParseInt(gamma, 2, 64)
+	fmt.Printf("Oxygen Set Rating: %s\n", oxygenSetRating)
+	fmt.Printf("CO2 Scrubber Rating: %s\n", co2ScrubberRating)
+
+	od, err := strconv.ParseInt(oxygenSetRating, 2, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
-	epsilonD, err := strconv.ParseInt(epsilon, 2, 64)
+	cd, err := strconv.ParseInt(co2ScrubberRating, 2, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Printf("%d * %d = %d\n", gammaD, epsilonD, gammaD*epsilonD)
+	fmt.Printf("%d * %d = %d\n", od, cd, od*cd)
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
