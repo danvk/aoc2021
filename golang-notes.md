@@ -2,6 +2,10 @@
 
 ## Advent of Code
 
+### Day 2
+
+Introduces some string parsing. In Rust I would have set up an enum to represent the movements, and in TypeScript I'd set up a union type. I guess I could have set up a `struct` in Go since the moves all have the same shape.
+
 ### Day 1
 
 Things to set up here were:
