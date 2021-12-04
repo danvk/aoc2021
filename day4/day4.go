@@ -38,23 +38,8 @@ func (b *Board) CallNumber(num int) {
 	}
 }
 
-func readRowColB(called *[][]bool, x0 int, y0 int, dx int, dy int) []bool {
-	result := []bool{}
-	x := x0
-	y := y0
-	for {
-		if x < 0 || x >= len(*called) || y < 0 || y >= len((*called)[x]) {
-			break
-		}
-		result = append(result, (*called)[x][y])
-		x += dx
-		y += dy
-	}
-	return result
-}
-
-func readRowColI(cells *[][]int, x0 int, y0 int, dx int, dy int) []int {
-	result := []int{}
+func readRowCol[T any](cells *[][]T, x0 int, y0 int, dx int, dy int) []T {
+	result := []T{}
 	x := x0
 	y := y0
 	for {
@@ -71,15 +56,15 @@ func readRowColI(cells *[][]int, x0 int, y0 int, dx int, dy int) []int {
 func (b *Board) IsWinner() (bool, []int) {
 	// Cols
 	for x := range b.cells {
-		if util.AllTrue(readRowColB(&b.called, x, 0, 0, 1)) {
-			return true, readRowColI(&b.cells, x, 0, 0, 1)
+		if util.AllEq(readRowCol(&b.called, x, 0, 0, 1), true) {
+			return true, readRowCol(&b.cells, x, 0, 0, 1)
 		}
 	}
 
 	// Rows
 	for y := range b.cells {
-		if util.AllTrue(readRowColB(&b.called, 0, y, 1, 0)) {
-			return true, readRowColI(&b.cells, 0, y, 1, 0)
+		if util.AllEq(readRowCol(&b.called, 0, y, 1, 0), true) {
+			return true, readRowCol(&b.cells, 0, y, 1, 0)
 		}
 	}
 
@@ -121,7 +106,7 @@ out:
 			isWinner, cells := b.IsWinner()
 			if isWinner {
 				hasWon[i] = true
-				if util.AllTrue(hasWon) {
+				if util.AllEq(hasWon, true) {
 					sumUnmarked := b.SumUnmarked()
 					fmt.Printf("Winning board %d, number: %d, numbers: %v, sum: %d, answer: %d\n", i, num, cells, sumUnmarked, sumUnmarked*num)
 					break out

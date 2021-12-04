@@ -5,19 +5,24 @@ import (
 	"testing"
 )
 
-func TestAllTrue(t *testing.T) {
-	if !AllTrue([]bool{true, true, true}) {
+func TestAllEq(t *testing.T) {
+	if !AllEq([]bool{true, true, true}, true) {
 		t.Log("Should be true")
 		t.Fail()
 	}
 
-	if AllTrue([]bool{true, false, true}) {
+	if AllEq([]bool{true, false, true}, true) {
 		t.Log("Should be false")
 		t.Fail()
 	}
 
-	if !AllTrue([]bool{}) {
+	if !AllEq([]bool{}, true) {
 		t.Log("Empty array is all true")
+		t.Fail()
+	}
+
+	if !AllEq([]int{42, 42, 42}, 42) {
+		t.Log("Should be all 42")
 		t.Fail()
 	}
 }

@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func AllTrue(vals []bool) bool {
+func AllEq[T comparable](vals []T, val T) bool {
 	for _, v := range vals {
-		if !v {
+		if v != val {
 			return false
 		}
 	}
