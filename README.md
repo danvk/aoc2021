@@ -2,6 +2,14 @@
 
 ## Advent of Code
 
+### Day 4
+
+The `%v` formatting just uses spaces to delimit array elements, which is pretty ambiguous about where arrays begin and end!
+
+    len(chunk[1]) = 5, chunk[1]: [22 13 17 11  0  8  2 23  4 24 21  9 14 16  7  6 10  3 18  5  1 12 20 15 19]
+
+Weird that you can return a tuple but can't pass tuples as a parameter.
+
 ### Day 3
 
 The distinction between chars and bytes is a bit annoying. I got tripped up by doing:
