@@ -17,6 +17,18 @@ The lack of generics is pretty crazy. Today might be a good chance to try out Go
 I posted my solution on the Megathread. Not a ton of Go solutions:
 <https://www.reddit.com/r/adventofcode/comments/r8i1lq/2021_day_4_solutions/>
 
+Generics are nice to have. Very puzzled by this error:
+
+```go
+func AllEq[T comparable](vals []T, val T) bool {
+	return All(vals, func(x T) { return x == val })
+    //               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // type func(x T) of (func(x T) literal) does not match inferred type func(T) bool for func(T) boolcompilerErrorCode(138)
+}
+```
+
+Changing it to `func(x T) bool { return x == val }` fixes the error, but what does Go think the return type is otherwise?
+
 ### Day 3
 
 The distinction between chars and bytes is a bit annoying. I got tripped up by doing:

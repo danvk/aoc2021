@@ -8,13 +8,53 @@ import (
 	"strings"
 )
 
-func AllEq[T comparable](vals []T, val T) bool {
-	for _, v := range vals {
-		if v != val {
+// https://github.com/golang/go/discussions/47203#discussioncomment-1005457
+func Any[T any](vs []T, p func(T) bool) bool {
+	for _, v := range vs {
+		if p(v) {
+			return true
+		}
+	}
+	return false
+}
+
+func All[T any](vs []T, p func(T) bool) bool {
+	for _, v := range vs {
+		if !p(v) {
 			return false
 		}
 	}
 	return true
+}
+
+func AllEq[T comparable](vals []T, val T) bool {
+	return All(vals, func(x T) bool { return x == val })
+}
+
+func Map[T any, U any](vals []T, fn func(T) U) []U {
+	us := []U{}
+	for _, v := range vals {
+		us = append(us, fn(v))
+	}
+	return us
+}
+
+func Filter[T any](vals []T, fn func(T) bool) []T {
+	result := []T{}
+	for _, v := range vals {
+		if fn(v) {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func FlatMap[T any, U any](vals []T, fn func(T) []U) []U {
+	us := []U{}
+	for _, v := range vals {
+		us = append(us, fn(v)...)
+	}
+	return us
 }
 
 func ParseLineAsNums(line string, delim string, skipBlanks bool) []int {
