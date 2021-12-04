@@ -30,7 +30,7 @@ func ParseLineAsNums(line string, delim string, skipBlanks bool) []int {
 		}
 		num, err := strconv.Atoi(part)
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		nums = append(nums, num)
 	}
@@ -41,7 +41,7 @@ func ParseLineAsNums(line string, delim string, skipBlanks bool) []int {
 func ReadChunks(path string) [][]string {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	defer file.Close()
 
@@ -62,7 +62,7 @@ func ReadChunks(path string) [][]string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return chunks
