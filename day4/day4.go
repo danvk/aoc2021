@@ -183,15 +183,19 @@ func main() {
 		fmt.Printf("Board %d: %v\n", i, boards[i])
 	}
 
+	hasWon := make([]bool, len(boards))
 out:
 	for _, num := range calledNums {
 		for i, b := range boards {
 			b.CallNumber(num)
 			isWinner, cells := b.IsWinner()
 			if isWinner {
-				sumUnmarked := b.SumUnmarked()
-				fmt.Printf("Winning board %d, number: %d, numbers: %v, sum: %d, answer: %d\n", i, num, cells, sumUnmarked, sumUnmarked*num)
-				break out
+				hasWon[i] = true
+				if allTrue(hasWon) {
+					sumUnmarked := b.SumUnmarked()
+					fmt.Printf("Winning board %d, number: %d, numbers: %v, sum: %d, answer: %d\n", i, num, cells, sumUnmarked, sumUnmarked*num)
+					break out
+				}
 			}
 		}
 	}
