@@ -28,7 +28,7 @@ func ParseLineAsNums(line string, delim string, skipBlanks bool) []int {
 			}
 			log.Fatalf("Blank in %s", part)
 		}
-		num, err := strconv.Atoi(part)
+		num, err := strconv.Atoi(strings.TrimSpace(part))
 		if err != nil {
 			panic(err)
 		}
