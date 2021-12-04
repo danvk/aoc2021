@@ -79,14 +79,6 @@ func allTrue(vals []bool) bool {
 	return true
 }
 
-func sum(vals []int) int {
-	val := 0
-	for _, v := range vals {
-		val += v
-	}
-	return val
-}
-
 func (b *Board) IsWinner() (bool, []int) {
 	// Rows
 	for x := range b.cells {
