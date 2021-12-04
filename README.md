@@ -8,7 +8,14 @@ The `%v` formatting just uses spaces to delimit array elements, which is pretty 
 
     len(chunk[1]) = 5, chunk[1]: [22 13 17 11  0  8  2 23  4 24 21  9 14 16  7  6 10  3 18  5  1 12 20 15 19]
 
-Weird that you can return a tuple but can't pass tuples as a parameter.
+Weird that you can return a tuple but can't pass tuples as a parameter. I guess tuple types aren't a thing in Go, just multiple return values.
+
+I got tripped up and misread the solution as the sum of the winning squares, so I wound up implementing some unneeded functions.
+
+The lack of generics is pretty crazy. Today might be a good chance to try out Go 1.18.
+
+I posted my solution on the Megathread. Not a ton of Go solutions:
+<https://www.reddit.com/r/adventofcode/comments/r8i1lq/2021_day_4_solutions/>
 
 ### Day 3
 
