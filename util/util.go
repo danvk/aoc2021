@@ -142,3 +142,10 @@ func Max[T constraints.Ordered](nums []T) T {
 	}
 	return max
 }
+
+func Ordered[T constraints.Ordered](a T, b T) (T, T) {
+	if a <= b {
+		return a, b
+	}
+	return b, a
+}

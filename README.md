@@ -2,6 +2,12 @@
 
 ## Advent of Code
 
+### Day 5
+
+The only really new thing today was using regular expressions to parse input. It looks like `FindStringSubmatch` is going to be my friend <https://pkg.go.dev/regexp#Regexp.FindStringSubmatch>.
+
+I defined a generic `Min` function and used it along with `FlatMap` to get the max X and Y values for the grid. I think this is cute, but maybe not idiomatic Go. At least not yet? I do think having access to generics greatly improves my happiness working with Go.
+
 ### Day 4
 
 The `%v` formatting just uses spaces to delimit array elements, which is pretty ambiguous about where arrays begin and end!

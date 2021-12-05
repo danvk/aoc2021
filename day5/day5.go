@@ -1,8 +1,7 @@
 package main
 
 import (
-	"aoc/day1/util"
-	"constraints"
+	"aoc/util"
 	"fmt"
 	"log"
 	"os"
@@ -43,34 +42,25 @@ func ParseLine(line string) Line {
 	}
 }
 
-func ordered[T constraints.Ordered](a T, b T) (T, T) {
-	if a <= b {
-		return a, b
-	}
-	return b, a
-}
-
 func (line *Line) Stroke(mat [][]int) {
 	if line.start.x == line.end.x {
 		// It's a column
 		x := line.start.x
-		y0, y1 := ordered(line.start.y, line.end.y)
+		y0, y1 := util.Ordered(line.start.y, line.end.y)
 		for y := y0; y <= y1; y++ {
 			mat[x][y] += 1
 		}
 	} else if line.start.y == line.end.y {
 		// It's a row
 		y := line.start.y
-		x0, x1 := ordered(line.start.x, line.end.x)
+		x0, x1 := util.Ordered(line.start.x, line.end.x)
 		for x := x0; x <= x1; x++ {
 			mat[x][y] += 1
 		}
 	} else {
 		// Normalize so it's going L->R
-		x0 := line.start.x
-		y0 := line.start.y
-		x1 := line.end.x
-		y1 := line.end.y
+		x0, y0 := line.start.x, line.start.y
+		x1, y1 := line.end.x, line.end.y
 		if x1 < x0 {
 			x1, x0 = x0, x1
 			y1, y0 = y0, y1
