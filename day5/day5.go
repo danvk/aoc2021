@@ -48,14 +48,14 @@ func (line *Line) Stroke(mat [][]int) {
 		x := line.start.x
 		y0, y1 := util.Ordered(line.start.y, line.end.y)
 		for y := y0; y <= y1; y++ {
-			mat[x][y] += 1
+			mat[y][x] += 1
 		}
 	} else if line.start.y == line.end.y {
 		// It's a row
 		y := line.start.y
 		x0, x1 := util.Ordered(line.start.x, line.end.x)
 		for x := x0; x <= x1; x++ {
-			mat[x][y] += 1
+			mat[y][x] += 1
 		}
 	} else {
 		// Normalize so it's going L->R
@@ -74,7 +74,7 @@ func (line *Line) Stroke(mat [][]int) {
 
 		// fmt.Printf("(%d, %d) - (%d, %d) dy: %d\n", x0, y0, x1, y1, dy)
 		for x, y := x0, y0; x <= x1; x, y = x+1, y+dy {
-			mat[x][y] += 1
+			mat[y][x] += 1
 		}
 	}
 }
@@ -88,8 +88,8 @@ func Ys(line Line) []int {
 }
 
 func PrintMat(mat [][]int) {
-	for _, row := range mat {
-		for _, count := range row {
+	for _, col := range mat {
+		for _, count := range col {
 			fmt.Printf("%d", count)
 		}
 		fmt.Printf("\n")
@@ -102,11 +102,11 @@ func main() {
 	lines := util.Map(linesText, ParseLine)
 	maxX := util.Max(util.FlatMap(lines, Xs))
 	maxY := util.Max(util.FlatMap(lines, Ys))
-	fmt.Printf("Size: %d x %d\n", maxX, maxY)
+	fmt.Printf("Size: %d x %d\n", maxY, maxX)
 
-	counts := make([][]int, maxX+1)
-	for x := 0; x <= maxX; x++ {
-		counts[x] = make([]int, maxY+1)
+	counts := make([][]int, maxY+1)
+	for x := 0; x <= maxY; x++ {
+		counts[x] = make([]int, maxX+1)
 	}
 
 	for _, line := range lines {
@@ -116,8 +116,8 @@ func main() {
 	// PrintMat(counts)
 
 	numMultiple := 0
-	for _, row := range counts {
-		for _, count := range row {
+	for _, col := range counts {
+		for _, count := range col {
 			if count >= 2 {
 				numMultiple++
 			}
