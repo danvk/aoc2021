@@ -29,6 +29,8 @@ func AllEq[T comparable](vals []T, val T) bool {
 
 Changing it to `func(x T) bool { return x == val }` fixes the error, but what does Go think the return type is otherwise?
 
+Here's the proposal: <https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md> It's notably agnostic about the implementation. Unclear to me whether generic functions are implemented via erasure or by instantiating multiple versions of the function.
+
 ### Day 3
 
 The distinction between chars and bytes is a bit annoying. I got tripped up by doing:

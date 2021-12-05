@@ -2,6 +2,7 @@ package util
 
 import (
 	"bufio"
+	"constraints"
 	"log"
 	"os"
 	"strconv"
@@ -77,6 +78,27 @@ func ParseLineAsNums(line string, delim string, skipBlanks bool) []int {
 	return nums
 }
 
+// Read a file to an array of lines
+func ReadLines(path string) []string {
+	file, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lines := []string{}
+	for scanner.Scan() {
+		line := scanner.Text()
+		lines = append(lines, line)
+	}
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+
+	return lines
+}
+
 // Read a file into blank line-delimited "chunks"
 func ReadChunks(path string) [][]string {
 	file, err := os.Open(path)
@@ -106,4 +128,17 @@ func ReadChunks(path string) [][]string {
 	}
 
 	return chunks
+}
+
+func Max[T constraints.Ordered](nums []T) T {
+	if len(nums) == 0 {
+		panic(nums)
+	}
+	max := nums[0]
+	for _, v := range nums[1:] {
+		if v > max {
+			max = v
+		}
+	}
+	return max
 }
