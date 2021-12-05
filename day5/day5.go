@@ -66,7 +66,26 @@ func (line *Line) Stroke(mat [][]int) {
 			mat[x][y] += 1
 		}
 	} else {
-		log.Printf("Ignoring line %v", *line)
+		// Normalize so it's going L->R
+		x0 := line.start.x
+		y0 := line.start.y
+		x1 := line.end.x
+		y1 := line.end.y
+		if x1 < x0 {
+			x1, x0 = x0, x1
+			y1, y0 = y0, y1
+		}
+		var dy int
+		if y0 < y1 {
+			dy = 1
+		} else {
+			dy = -1
+		}
+
+		// fmt.Printf("(%d, %d) - (%d, %d) dy: %d\n", x0, y0, x1, y1, dy)
+		for x, y := x0, y0; x <= x1; x, y = x+1, y+dy {
+			mat[x][y] += 1
+		}
 	}
 }
 
@@ -104,7 +123,7 @@ func main() {
 		line.Stroke(counts)
 	}
 
-	PrintMat(counts)
+	// PrintMat(counts)
 
 	numMultiple := 0
 	for _, row := range counts {
