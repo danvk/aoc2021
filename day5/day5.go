@@ -104,11 +104,7 @@ func main() {
 	maxY := util.Max(util.FlatMap(lines, Ys))
 	fmt.Printf("Size: %d x %d\n", maxY, maxX)
 
-	counts := make([][]int, maxY+1)
-	for x := 0; x <= maxY; x++ {
-		counts[x] = make([]int, maxX+1)
-	}
-
+	counts := util.Zeros[int](maxX+1, maxY+1)
 	for _, line := range lines {
 		line.Stroke(counts)
 	}

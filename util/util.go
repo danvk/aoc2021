@@ -143,9 +143,19 @@ func Max[T constraints.Ordered](nums []T) T {
 	return max
 }
 
+// Returns either (a, b) or (b, a) such that the tuple is ordered
 func Ordered[T constraints.Ordered](a T, b T) (T, T) {
 	if a <= b {
 		return a, b
 	}
 	return b, a
+}
+
+// Construct a row-major array of size wxh (access as mat[y][x]).
+func Zeros[T any](w int, h int) [][]T {
+	xs := make([][]T, h)
+	for y := 0; y < h; y++ {
+		xs[y] = make([]T, w)
+	}
+	return xs
 }

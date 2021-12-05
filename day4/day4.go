@@ -92,11 +92,7 @@ func main() {
 	calledNums := util.ParseLineAsNums(chunks[0][0], ",", false)
 	fmt.Printf("Called nums: %v\n", calledNums)
 
-	boards := make([]Board, len(chunks)-1)
-	for i, chunk := range chunks[1:] {
-		boards[i] = ParseBoard(chunk)
-		fmt.Printf("Board %d: %v\n", i, boards[i])
-	}
+	boards := util.Map(chunks[1:], ParseBoard)
 
 	hasWon := make([]bool, len(boards))
 out:
