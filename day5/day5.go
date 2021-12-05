@@ -42,20 +42,20 @@ func ParseLine(line string) Line {
 	}
 }
 
-func (line *Line) Stroke(mat [][]int) {
+func (line *Line) Stroke(mat map[Coord]int) {
 	if line.start.x == line.end.x {
 		// It's a column
 		x := line.start.x
 		y0, y1 := util.Ordered(line.start.y, line.end.y)
 		for y := y0; y <= y1; y++ {
-			mat[y][x] += 1
+			mat[Coord{x: x, y: y}] += 1
 		}
 	} else if line.start.y == line.end.y {
 		// It's a row
 		y := line.start.y
 		x0, x1 := util.Ordered(line.start.x, line.end.x)
 		for x := x0; x <= x1; x++ {
-			mat[y][x] += 1
+			mat[Coord{x: x, y: y}] += 1
 		}
 	} else {
 		// Normalize so it's going L->R
@@ -74,17 +74,9 @@ func (line *Line) Stroke(mat [][]int) {
 
 		// fmt.Printf("(%d, %d) - (%d, %d) dy: %d\n", x0, y0, x1, y1, dy)
 		for x, y := x0, y0; x <= x1; x, y = x+1, y+dy {
-			mat[y][x] += 1
+			mat[Coord{x: x, y: y}] += 1
 		}
 	}
-}
-
-func Xs(line Line) []int {
-	return []int{line.start.x, line.end.x}
-}
-
-func Ys(line Line) []int {
-	return []int{line.start.y, line.end.y}
 }
 
 func PrintMat(mat [][]int) {
@@ -100,11 +92,11 @@ func main() {
 	linesText := util.ReadLines(os.Args[1])
 
 	lines := util.Map(linesText, ParseLine)
-	maxX := util.Max(util.FlatMap(lines, Xs))
-	maxY := util.Max(util.FlatMap(lines, Ys))
+	maxX := util.Max(util.FlatMap(lines, func(x Line) []int { return []int{x.start.x, x.end.x} }))
+	maxY := util.Max(util.FlatMap(lines, func(x Line) []int { return []int{x.start.y, x.end.y} }))
 	fmt.Printf("Size: %d x %d\n", maxY, maxX)
 
-	counts := util.Zeros[int](maxX+1, maxY+1)
+	counts := map[Coord]int{}
 	for _, line := range lines {
 		line.Stroke(counts)
 	}
@@ -112,11 +104,9 @@ func main() {
 	// PrintMat(counts)
 
 	numMultiple := 0
-	for _, col := range counts {
-		for _, count := range col {
-			if count >= 2 {
-				numMultiple++
-			}
+	for _, count := range counts {
+		if count >= 2 {
+			numMultiple++
 		}
 	}
 	fmt.Printf("Num >=2: %d\n", numMultiple)
