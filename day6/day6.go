@@ -12,12 +12,13 @@ type Lanternfish struct {
 
 func Advance(school *[]Lanternfish) {
 	newFish := []Lanternfish{}
-	for _, fish := range *school {
+	for i, fish := range *school {
 		if fish.timer == 0 {
 			newFish = append(newFish, Lanternfish{8})
-			fish.timer = 6
+			// Note: can't just do fish.timer -= 1, as fish is a copy
+			(*school)[i].timer = 6
 		} else {
-			fish.timer -= 1
+			(*school)[i].timer -= 1
 		}
 	}
 	if len(newFish) > 0 {
