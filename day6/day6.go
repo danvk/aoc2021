@@ -41,10 +41,30 @@ func main() {
 	school := util.ParseLineAsNums(linesText[0], ",", false)
 	// school := util.Map(initCounts, func(n int) Lanternfish { return Lanternfish{timer: n} })
 
-	for day := 1; day <= 80; day++ {
-		school = util.FlatMap(school, AdvanceOne)
+	counts := map[int]int{}
+	for _, timer := range school {
+		counts[timer] += 1
+	}
 
-		fmt.Printf("Day %d, size: %d\n", day, len(school))
+	for day := 1; day <= 256; day++ {
+		// school = util.FlatMap(school, AdvanceOne)
+		nextCounts := map[int]int{}
+		for timer, count := range counts {
+			if timer == 0 {
+				nextCounts[6] += count
+				nextCounts[8] += count
+			} else {
+				nextCounts[timer-1] += count
+			}
+		}
+		counts = nextCounts
+
+		schoolSize := 0
+		for _, count := range counts {
+			schoolSize += count
+		}
+
+		fmt.Printf("Day %d, size: %d\n", day, schoolSize)
 		// PrintSchool(school)
 	}
 }
