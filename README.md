@@ -2,6 +2,40 @@
 
 ## Advent of Code
 
+### Day 6
+
+First day where the obvious implementation of part 1 is too slow for part 2.
+
+What tripped me up today was that structs are passed around by value, so there's implicit copying that happens even in a `for` loop. So in this code:
+
+```go
+func Advance(school *[]Lanternfish) {
+	newFish := []Lanternfish{}
+	for _, fish := range *school {
+		if fish.timer == 0 {
+			newFish = append(newFish, Lanternfish{8})
+			fish.timer = 6
+		} else {
+			fish.timer -= 1
+		}
+	}
+}
+```
+
+The struct referenced by `fish` is a copy, not the struct in the array. So the changes you make to it get thrown away. You need to mutate it via `fish[i].timer -= 1`.
+
+I need to get a better sense for where implicit copies happen in Go. This also tripped me up with the REPL.
+
+Some notes from skimming the Go Programming Language book:
+
+- Go strings are immutable. I guess JavaScript strings are immutable, too, but it feels more surprising in Go.
+- Go arrays are fixed length, which is why you normally work with slices.
+- Go has built-in `complex64` and `complex128` types. Might be useful for some puzzles, or as an alternative to a Coordinate structure.
+- Every type has a zero value, it's `nil` for most types.
+- You can do `type Celsius int32` to get something that's neither comparable nor assignable to a plain `int32`. This explains why the generics proposal talks so much about "underlying types", i.e. `~T`.
+- You can use `:=` for reassignment, so long as it declares at least one new var.
+- They say Go is fun, so I guess I'm wrong about that.
+
 ### Day 5
 
 The only really new thing today was using regular expressions to parse input. It looks like `FindStringSubmatch` is going to be my friend <https://pkg.go.dev/regexp#Regexp.FindStringSubmatch>.

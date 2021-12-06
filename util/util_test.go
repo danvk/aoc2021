@@ -2,6 +2,7 @@ package util
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -48,6 +49,26 @@ func TestMap(t *testing.T) {
 	nums = Map([]string{"hi", "bye"}, func(x string) int { return len(x) })
 	if !reflect.DeepEqual(nums, []int{2, 3}) {
 		t.Fatalf("Expected 2, 3 got %v", nums)
+	}
+}
+
+func TestMapErr(t *testing.T) {
+	strs := []string{"123", "456"}
+	nums, err := MapErr(strs, strconv.Atoi)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	expected := []int{123, 456}
+	if !reflect.DeepEqual(nums, expected) {
+		t.Fatalf("Expected %v, got %v", expected, err)
+	}
+
+	nums, err = MapErr([]string{"123", "456", "abc"}, strconv.Atoi)
+	if nums != nil {
+		t.Fatalf("Expected nil, got %v", nums)
+	}
+	if err == nil {
+		t.Fatalf("Expected error, got nil")
 	}
 }
 

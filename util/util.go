@@ -33,11 +33,24 @@ func AllEq[T comparable](vals []T, val T) bool {
 }
 
 func Map[T any, U any](vals []T, fn func(T) U) []U {
-	us := []U{}
-	for _, v := range vals {
-		us = append(us, fn(v))
+	us := make([]U, len(vals))
+	for i, v := range vals {
+		us[i] = fn(v)
 	}
 	return us
+}
+
+// More convenient variant of Map for functions that return a value and an error.
+func MapErr[T any, U any](vals []T, fn func(T) (U, error)) ([]U, error) {
+	us := make([]U, len(vals))
+	for i, v := range vals {
+		u, err := fn(v)
+		if err != nil {
+			return nil, err
+		}
+		us[i] = u
+	}
+	return us, nil
 }
 
 func Filter[T any](vals []T, fn func(T) bool) []T {
