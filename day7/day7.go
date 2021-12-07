@@ -26,6 +26,11 @@ func CostOfPosition(crabs []int, pos int) int {
 	return fuel
 }
 
+func Mean(xs []int) float64 {
+	sum := util.Sum(xs)
+	return float64(sum) / float64(len(xs))
+}
+
 func main() {
 	linesText := util.ReadLines(os.Args[1])
 	if len(linesText) != 1 {
@@ -42,4 +47,5 @@ func main() {
 	})
 
 	fmt.Printf("Lowest fuel %d @ pos %d\n", lowestFuel, lowestPos)
+	fmt.Printf("Mean position: %f\n", Mean(crabs))
 }

@@ -230,3 +230,15 @@ func Zeros[T any](w int, h int) [][]T {
 	}
 	return xs
 }
+
+type Numeric interface {
+	constraints.Integer | constraints.Float | constraints.Complex
+}
+
+func Sum[T Numeric](xs []T) T {
+	var tally T
+	for _, x := range xs {
+		tally += x
+	}
+	return tally
+}
