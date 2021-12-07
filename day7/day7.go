@@ -33,7 +33,7 @@ func main() {
 	}
 	crabs := util.ParseLineAsNums(linesText[0], ",", false)
 
-	min, max := util.Min(crabs), util.Max(crabs)
+	min, max := util.MinMax(crabs)
 
 	lowestFuel := -1
 	lowestPos := -1

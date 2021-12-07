@@ -169,6 +169,22 @@ func Min[T constraints.Ordered](nums []T) T {
 	return min
 }
 
+// Find the min and max simultaneously, which is slightly more efficient
+func MinMax[T constraints.Ordered](nums []T) (T, T) {
+	if len(nums) == 0 {
+		panic(nums)
+	}
+	min, max := nums[0], nums[0]
+	for _, v := range nums[1:] {
+		if v < min {
+			min = v
+		} else if v > max {
+			max = v
+		}
+	}
+	return min, max
+}
+
 // Returns either (a, b) or (b, a) such that the tuple is ordered
 func Ordered[T constraints.Ordered](a T, b T) (T, T) {
 	if a <= b {
