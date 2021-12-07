@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bufio"
+	"aoc/util"
 	"fmt"
 	"log"
 	"os"
@@ -23,31 +23,14 @@ func calcSums(nums []int, n int) []int {
 }
 
 func main() {
-	file, err := os.Open(os.Args[1])
+	nums, err := util.MapErr(util.ReadLines(os.Args[1]), strconv.Atoi)
 	if err != nil {
 		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	// optionally, resize scanner's capacity for lines over 64K, see next example
-	nums := make([]int, 0)
-	for scanner.Scan() {
-		line := scanner.Text()
-		this, err := strconv.Atoi(line)
-		if err != nil {
-			log.Fatal(err)
-		}
-		nums = append(nums, this)
 	}
 
 	sums := calcSums(nums, 3)
 	for _, sum := range sums {
 		fmt.Printf("%d\n", sum)
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
 	}
 
 	last := -1

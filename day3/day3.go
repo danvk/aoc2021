@@ -1,16 +1,16 @@
 package main
 
 import (
-	"bufio"
+	"aoc/util"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 )
 
-func mostCommonBitAtPos(nums *[]string, pos int) int {
+func mostCommonBitAtPos(nums []string, pos int) int {
 	counts := []int{0, 0}
-	for _, num := range *nums {
+	for _, num := range nums {
 		d := num[pos] - '0'
 		counts[d] += 1
 	}
@@ -25,7 +25,7 @@ func mostCommonBitAtPos(nums *[]string, pos int) int {
 	return -1 // tie
 }
 
-func filterByBit(nums *[]string, pos int, bit int) []string {
+func filterByBit(nums []string, pos int, bit int) []string {
 	result := make([]string, 0)
 	var c byte
 	if bit == 0 {
@@ -33,7 +33,9 @@ func filterByBit(nums *[]string, pos int, bit int) []string {
 	} else {
 		c = '1'
 	}
-	for _, num := range *nums {
+
+	// TODO: Can Filter be written in a way that captures this?
+	for _, num := range nums {
 		if num[pos] == c {
 			result = append(result, num)
 		}
@@ -42,27 +44,16 @@ func filterByBit(nums *[]string, pos int, bit int) []string {
 }
 
 func main() {
-	file, err := os.Open(os.Args[1])
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	nums := []string{}
-	for scanner.Scan() {
-		line := scanner.Text()
-		nums = append(nums, line)
-	}
+	nums := util.ReadLines(os.Args[1])
 
 	oxygenRatingSet := nums
 	for pos := range nums[0] {
 		// fmt.Printf("nums[0]: %s, pos: %d", nums[0], pos)
-		mostCommon := mostCommonBitAtPos(&oxygenRatingSet, pos)
+		mostCommon := mostCommonBitAtPos(oxygenRatingSet, pos)
 		if mostCommon == -1 {
 			mostCommon = 1
 		}
-		oxygenRatingSet = filterByBit(&oxygenRatingSet, pos, mostCommon)
+		oxygenRatingSet = filterByBit(oxygenRatingSet, pos, mostCommon)
 		if len(oxygenRatingSet) == 1 {
 			break
 		}
@@ -71,12 +62,12 @@ func main() {
 
 	co2ScrubberSet := nums
 	for pos := range nums[0] {
-		mostCommon := mostCommonBitAtPos(&co2ScrubberSet, pos)
+		mostCommon := mostCommonBitAtPos(co2ScrubberSet, pos)
 		leastCommon := 1 - mostCommon
 		if mostCommon == -1 {
 			leastCommon = 0
 		}
-		co2ScrubberSet = filterByBit(&co2ScrubberSet, pos, leastCommon)
+		co2ScrubberSet = filterByBit(co2ScrubberSet, pos, leastCommon)
 		if len(co2ScrubberSet) == 1 {
 			break
 		}
@@ -95,8 +86,4 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("%d * %d = %d\n", od, cd, od*cd)
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
 }
