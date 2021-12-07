@@ -14,10 +14,14 @@ func Abs(x int) int {
 	return x
 }
 
+func FuelForMove(x int) int {
+	return x * (x + 1) / 2
+}
+
 func CostOfPosition(crabs []int, pos int) int {
 	fuel := 0
 	for _, crab := range crabs {
-		fuel += Abs(pos - crab)
+		fuel += FuelForMove(Abs(pos - crab))
 	}
 	return fuel
 }
