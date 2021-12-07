@@ -33,9 +33,9 @@ func AllEq[T comparable](vals []T, val T) bool {
 }
 
 func Map[T any, U any](vals []T, fn func(T) U) []U {
-	us := make([]U, len(vals))
-	for i, v := range vals {
-		us[i] = fn(v)
+	us := make([]U, 0, len(vals))
+	for _, v := range vals {
+		us = append(us, fn(v))
 	}
 	return us
 }
