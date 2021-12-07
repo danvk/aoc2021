@@ -185,6 +185,35 @@ func MinMax[T constraints.Ordered](nums []T) (T, T) {
 	return min, max
 }
 
+// Return the index i which maximizes f(xs(i)), and f(xs(i)).
+func ArgMin[T any, U constraints.Ordered](xs []T, f func(T) U) (int, U) {
+	if len(xs) == 0 {
+		panic("Cannot take ArgMax of empty array")
+	}
+
+	min := f(xs[0])
+	argMin := 0
+	for i := 1; i < len(xs); i++ {
+		x := xs[i]
+		v := f(x)
+		if v < min {
+			min = v
+			argMin = i
+		}
+	}
+
+	return argMin, min
+}
+
+// Returns a slice of numbers from min to max, inclusive on both ends.
+func Seq(min int, max int) []int {
+	nums := make([]int, 0, max-min+1)
+	for v := min; v <= max; v++ {
+		nums = append(nums, v)
+	}
+	return nums
+}
+
 // Returns either (a, b) or (b, a) such that the tuple is ordered
 func Ordered[T constraints.Ordered](a T, b T) (T, T) {
 	if a <= b {

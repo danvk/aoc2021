@@ -34,17 +34,12 @@ func main() {
 	crabs := util.ParseLineAsNums(linesText[0], ",", false)
 
 	min, max := util.MinMax(crabs)
+	candidates := util.Seq(min, max)
+	// fmt.Printf("Candidates: %#v\n", candidates)
 
-	lowestFuel := -1
-	lowestPos := -1
-	for pos := min; pos <= max; pos++ {
-		fuel := CostOfPosition(crabs, pos)
-		if lowestFuel == -1 || fuel < lowestFuel {
-			lowestFuel = fuel
-			lowestPos = pos
-		}
-		fmt.Printf("Pos %d, fuel: %d\n", pos, fuel)
-	}
+	lowestPos, lowestFuel := util.ArgMin(candidates, func(pos int) int {
+		return CostOfPosition(crabs, pos)
+	})
 
 	fmt.Printf("Lowest fuel %d @ pos %d\n", lowestFuel, lowestPos)
 }
