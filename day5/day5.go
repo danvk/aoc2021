@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strconv"
 )
 
 type Coord struct {
@@ -22,24 +21,12 @@ type Line struct {
 var LinePat, _ = regexp.Compile("(\\d+),(\\d+) -> (\\d+),(\\d+)")
 
 func ParseLine(line string) Line {
-	matches := LinePat.FindStringSubmatch(line)
-	if matches == nil {
-		log.Fatalf("No match for %s", line)
+	var r Line
+	_, err := fmt.Sscanf(line, "%d,%d -> %d,%d", &r.start.x, &r.start.y, &r.end.x, &r.end.y)
+	if err != nil {
+		log.Fatalf("No match for %s: %v", line, err)
 	}
-	x0, _ := strconv.Atoi(matches[1])
-	y0, _ := strconv.Atoi(matches[2])
-	x1, _ := strconv.Atoi(matches[3])
-	y1, _ := strconv.Atoi(matches[4])
-	return Line{
-		start: Coord{
-			x: x0,
-			y: y0,
-		},
-		end: Coord{
-			x: x1,
-			y: y1,
-		},
-	}
+	return r
 }
 
 func (line *Line) Stroke(mat map[Coord]int) {
