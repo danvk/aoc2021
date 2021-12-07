@@ -2,6 +2,12 @@
 
 ## Advent of Code
 
+### Day 7
+
+Not much to this one. The most surprising thing to me was that Go doesn't have an integer `Abs` function, the rationale being that it's easy to implement and you should just write it yourself: <https://stackoverflow.com/questions/57648933/why-doesnt-go-have-a-function-to-calculate-the-absolute-value-of-integers>
+
+I reworked my initial answer to be a bit more functional, with `Seq` and `ArgMin` helpers. Not sure which version I prefer -- the verbosity of Go lambdas doesn't make you want to use them. Performance seems identical for both variants (for loop and `ArgMin`).
+
 ### Day 6
 
 First day where the obvious implementation of part 1 is too slow for part 2.
