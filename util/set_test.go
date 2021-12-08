@@ -13,4 +13,7 @@ func TestUnionWith(t *testing.T) {
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("%#v.UnionWith(%#v) = %#v want %#v", a, b, actual, expected)
 	}
+	if a.String() != "a,b,c" {
+		t.Errorf("a was mutated by UnionWith, got %v want a,b,c", a)
+	}
 }

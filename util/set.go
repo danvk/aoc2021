@@ -1,6 +1,29 @@
 package util
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Set[T comparable] map[T]bool
+
+// Would be nice if this method required Stringer | string
+func (this Set[T]) String() string {
+	keys := make([]string, 0, len(this))
+	for k := range this {
+		var ki interface{} = k
+		s, ok := ki.(string)
+		if !ok {
+			ss, ok := ki.(fmt.Stringer)
+			if !ok {
+				panic(k)
+			}
+			s = ss.String()
+		}
+		keys = append(keys, s)
+	}
+	return strings.Join(keys, ",")
+}
 
 func SetFrom[T comparable](els []T) Set[T] {
 	result := make(Set[T])
