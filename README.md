@@ -2,6 +2,23 @@
 
 ## Advent of Code
 
+### Day 8
+
+Part two was the first puzzle that felt hard. I thought it was going to be _quite_ hard, but then saw that there were some consistent patterns to exploit that made things easier. I think my choice of data structures may have made this a bit harder on me, too.
+
+Nominal typing did come in handy and prevented at least one possibly confusing bug:
+
+```ts
+type ScrambledDigit byte
+type Digit byte
+```
+
+Here's a Gopher who did this using a third-party `set` structure:
+https://github.com/microhod/adventofcode/blob/main/2021/08/main.go
+https://github.com/deckarep/golang-set
+
+I like this but wish it were generic!
+
 ### Day 7
 
 Not much to this one. The most surprising thing to me was that Go doesn't have an integer `Abs` function, the rationale being that it's easy to implement and you should just write it yourself: <https://stackoverflow.com/questions/57648933/why-doesnt-go-have-a-function-to-calculate-the-absolute-value-of-integers>
