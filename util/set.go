@@ -11,6 +11,7 @@ type Set[T comparable] map[T]bool
 func (this Set[T]) String() string {
 	keys := make([]string, 0, len(this))
 	for k := range this {
+		fmt.Printf("String %#v\n", k)
 		var ki interface{} = k
 		s, ok := ki.(string)
 		if !ok {
@@ -20,6 +21,7 @@ func (this Set[T]) String() string {
 			}
 			s = ss.String()
 		}
+
 		keys = append(keys, s)
 	}
 	return strings.Join(keys, ",")
@@ -33,10 +35,32 @@ func SetFrom[T comparable](els []T) Set[T] {
 	return result
 }
 
+func SetFromChars(s string) Set[string] {
+	result := make(Set[string])
+	for _, c := range s {
+		result[string(c)] = true
+	}
+	return result
+}
+
+func (this Set[T]) Eq(other Set[T]) bool {
+	if len(this) != len(other) {
+		return false
+	}
+	for el := range this {
+		if _, ok := other[el]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
 func (this *Set[T]) Union(other Set[T]) {
 	for v := range other {
+		fmt.Printf("Adding %v\n", v)
 		(*this)[v] = true
 	}
+	fmt.Printf("this=%#v\n", *this)
 }
 
 func (this *Set[T]) Clone() Set[T] {
@@ -51,9 +75,17 @@ func (this *Set[T]) UnionWith(other Set[T]) Set[T] {
 	return result
 }
 
-func (this *Set[T]) Intersect(other Set[T]) Set[T] {
+func (this *Set[T]) Intersect(other Set[T]) {
+	for k := range *this {
+		if _, ok := other[k]; !ok {
+			delete(*this, k)
+		}
+	}
+}
+
+func (this *Set[T]) IntersectWith(other Set[T]) Set[T] {
 	if len(*this) < len(other) {
-		return other.Intersect(*this)
+		return other.IntersectWith(*this)
 	}
 	result := make(Set[T])
 	for v := range other {
@@ -62,4 +94,10 @@ func (this *Set[T]) Intersect(other Set[T]) Set[T] {
 		}
 	}
 	return result
+}
+
+func (this *Set[T]) Subtract(other Set[T]) {
+	for v := range other {
+		delete(*this, v)
+	}
 }
