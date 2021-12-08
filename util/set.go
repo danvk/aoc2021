@@ -69,35 +69,60 @@ func (this *Set[T]) Clone() Set[T] {
 	return result
 }
 
-func (this *Set[T]) UnionWith(other Set[T]) Set[T] {
+func (this Set[T]) UnionWith(other Set[T]) Set[T] {
 	result := this.Clone()
 	result.Union(other)
 	return result
 }
 
-func (this *Set[T]) Intersect(other Set[T]) {
-	for k := range *this {
+func (this Set[T]) Intersect(other Set[T]) {
+	for k := range this {
 		if _, ok := other[k]; !ok {
-			delete(*this, k)
+			delete(this, k)
 		}
 	}
 }
 
-func (this *Set[T]) IntersectWith(other Set[T]) Set[T] {
-	if len(*this) < len(other) {
-		return other.IntersectWith(*this)
+func (this Set[T]) IntersectWith(other Set[T]) Set[T] {
+	if len(this) < len(other) {
+		return other.IntersectWith(this)
 	}
 	result := make(Set[T])
 	for v := range other {
-		if _, ok := (*this)[v]; ok {
+		if _, ok := this[v]; ok {
 			result[v] = true
 		}
 	}
 	return result
 }
 
-func (this *Set[T]) Subtract(other Set[T]) {
+func (this Set[T]) Subtract(other Set[T]) {
 	for v := range other {
-		delete(*this, v)
+		delete(this, v)
 	}
+}
+
+func (this Set[T]) LoneElement() T {
+	if len(this) == 1 {
+		for k := range this {
+			return k
+		}
+	}
+	panic(this)
+}
+
+func (this Set[T]) Add(el T) {
+	this[el] = true
+}
+
+func (this Set[T]) Remove(el T) {
+	delete(this, el)
+}
+
+func (this Set[T]) AsSlice() []T {
+	keys := make([]T, 0, len(this))
+	for k := range this {
+		keys = append(keys, k)
+	}
+	return keys
 }
