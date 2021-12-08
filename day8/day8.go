@@ -4,6 +4,7 @@ import (
 	"aoc/util"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 )
 
@@ -157,6 +158,89 @@ func (s *Scramble) NarrowMappings() {
 
 }
 
+func Without[T comparable](xs []T, val T) []T {
+	return util.Filter(xs, func(x T) bool { return x != val })
+}
+
+func KeyForValue[K comparable, V comparable](m map[K]V, val V) (K, bool) {
+	var first K
+	for k, v := range m {
+		first = k
+		if v == val {
+			return k, true
+		}
+	}
+	return first, false
+}
+
+// The 1 uses only C&F and the 7 uses A, C and F.
+// So with 1 & 7, we know what A is.
+func (s *Scramble) FindTheA() {
+	var ones []ScrambledDigit
+	for _, signal := range s.signals {
+		if !reflect.DeepEqual(signal.candidateNums, []int{1}) {
+			continue
+		}
+		if len(signal.signals) != 2 {
+			panic(signal)
+		}
+		// Must be the 1
+		ones = signal.signals
+	}
+
+	fmt.Printf("Ones: %#v\n", ones)
+	var sevens []ScrambledDigit
+	for _, signal := range s.signals {
+		if !reflect.DeepEqual(signal.candidateNums, []int{7}) {
+			continue
+		}
+		if len(signal.signals) != 3 {
+			panic(signal)
+		}
+		// Must be the 7
+		sevens = signal.signals
+	}
+	fmt.Printf("Sevens: %#v\n", sevens)
+
+	for scramble, clear := range s.mappings {
+		if scramble != ones[0] && scramble != ones[1] {
+			s.mappings[scramble] = Without(Without(clear, 'c'), 'f')
+		}
+	}
+
+	// Figure out which one (uniquely) maps to A and remove it from the others
+	var a ScrambledDigit
+	for scramble, clear := range s.mappings {
+		if len(clear) == 1 && clear[0] == Digit('a') {
+			a = scramble
+			break
+		}
+	}
+	fmt.Printf("A: %v\n", a)
+	for scramble, clear := range s.mappings {
+		if scramble != a {
+			s.mappings[scramble] = Without(clear, 'a')
+		}
+	}
+
+	// Now B&D should be uniquely determined
+	var bdPre []ScrambledDigit
+	for scramble, clear := range s.mappings {
+		if len(clear) == 2 && clear[0] == Digit('b') && clear[1] == Digit('d') {
+			bdPre = append(bdPre, scramble)
+		}
+	}
+	if len(bdPre) != 2 {
+		panic(bdPre)
+	}
+	fmt.Printf("BD: %#v\n", bdPre)
+	for scramble, clear := range s.mappings {
+		if scramble != bdPre[0] && scramble != bdPre[1] {
+			s.mappings[scramble] = Without(Without(clear, 'b'), 'd')
+		}
+	}
+}
+
 func main() {
 	InitPatterns()
 	linesText := util.ReadLines(os.Args[1])
@@ -176,6 +260,9 @@ func main() {
 		scramble.PrintCandidates()
 		scramble.NarrowByLength()
 		fmt.Printf("Narrowed by length:\n")
+		scramble.PrintCandidates()
+		fmt.Printf("Find the seven/A:\n")
+		scramble.FindTheA()
 		scramble.PrintCandidates()
 	}
 
