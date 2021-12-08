@@ -2,22 +2,27 @@ package main
 
 import (
 	"aoc/util"
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
 	"strings"
 )
 
-// 0: abc efg 6
 // 1:   c  f  2 *
+// 7: a c  f  3 *
+// 4:  bcd f  4 *
 // 2: a cde g 5
 // 3: a cd fg 5
-// 4:  bcd f  4 *
 // 5: ab d fg 5
+// 0: abc efg 6
 // 6: ab defg 6
-// 7: a c  f  3 *
-// 8: abcdefg 7 *
 // 9: abcd fg 6
+// 8: abcdefg 7 *
+
+// e & g
+// c & f
+// b & d
 
 var PATTERNS_STR = [...]string{
 	0: "abcefg",
@@ -120,6 +125,17 @@ type Scramble struct {
 	mappings map[ScrambledDigit][]Digit
 }
 
+// TODO: make MapErr work with bools
+func GetDigitFromPattern(signal SignalPattern, code map[ScrambledDigit]Digit) (int, error) {
+	digits := util.Map(signal.signals, func(d ScrambledDigit) Digit { return code[d] })
+	for i, segments := range PATTERNS {
+		if EqDigits(digits, segments) {
+			return i, nil
+		}
+	}
+	return -1, errors.New("invalid mapping")
+}
+
 func NewScramble() (result Scramble) {
 	result.mappings = make(map[ScrambledDigit][]Digit)
 	for _, char := range "abcdefg" {
@@ -153,24 +169,124 @@ func (s *Scramble) NarrowByLength() {
 	}
 }
 
-// Narrow down the possible mappings based on the signals
-func (s *Scramble) NarrowMappings() {
+// a: cf
+// b: bd
+// c: bd
+// d: eg
+// e: eg
+// f: cf
+// g: a
 
+// a -> g
+// b -> bc
+// d -> bc
+// c -> af
+// f -> af
+// e -> de
+// g -> de
+
+// Try all the mappings and find the possible one
+func (s *Scramble) TryAllMappings() []int {
+	im := InvertMapping(s.mappings)
+	aPre := im[Digit('a')]
+	bdPre := im[Digit('b')]
+	egPre := im[Digit('e')]
+	cfPre := im[Digit('c')]
+	if len(aPre) != 1 || len(bdPre) != 2 || len(egPre) != 2 || len(cfPre) != 2 {
+		panic(im)
+	}
+
+	// Try 'em all!
+	a := aPre[0]
+	for i := 0; i < 2; i++ {
+		b := bdPre[i]
+		d := bdPre[1-i]
+		for j := 0; j < 2; j++ {
+			e := egPre[j]
+			g := egPre[1-j]
+			for k := 0; k < 2; k++ {
+				c := cfPre[k]
+				f := cfPre[1-k]
+
+				// Try out this mapping
+				code := map[ScrambledDigit]Digit{
+					a: 'a',
+					b: 'b',
+					c: 'c',
+					d: 'd',
+					e: 'e',
+					f: 'f',
+					g: 'g',
+				}
+
+				digits, err := util.MapErr(s.signals, func(s SignalPattern) (int, error) {
+					return GetDigitFromPattern(s, code)
+				})
+				if err == nil {
+					fmt.Printf("Decoding success!\n  Digits = %#v\n", digits)
+					PrintCode(code)
+					return digits
+				}
+				fmt.Printf(" nope, not that one!\n")
+			}
+		}
+	}
+	panic("No valid decoding found")
 }
+
+// a->c
+// f->d
+// g->e
+// b->f
+// c->g
+// d->a
+// e->b
+
+// cdfbe -> gadfb (5)
+
+// acedgfb=8
+// cdfbe: 5
+// gcdfa: 2
+// fbcad: 3
+// dab: 7 (a, c, f) yes
+// cefabd: 9
+// cdfgeb: 6
+// eafb: 4 (b, c, d, f) yes
+// cagedb: 0
+// ab: 1 (c, f) yes
 
 func Without[T comparable](xs []T, val T) []T {
 	return util.Filter(xs, func(x T) bool { return x != val })
 }
 
-func KeyForValue[K comparable, V comparable](m map[K]V, val V) (K, bool) {
-	var first K
-	for k, v := range m {
-		first = k
-		if v == val {
-			return k, true
+func InvertMapping(m map[ScrambledDigit][]Digit) map[Digit][]ScrambledDigit {
+	result := make(map[Digit][]ScrambledDigit)
+	for scramble, clears := range m {
+		for _, clear := range clears {
+			result[clear] = append(result[clear], scramble)
 		}
 	}
-	return first, false
+	return result
+}
+
+// Are the two sets of digits equal, ignoring order?
+func EqDigits(a []Digit, b []Digit) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for _, ad := range a {
+		found := false
+		for _, bd := range b {
+			if bd == ad {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }
 
 // The 1 uses only C&F and the 7 uses A, C and F.
@@ -241,15 +357,23 @@ func (s *Scramble) FindTheA() {
 	}
 }
 
+func PrintCode(code map[ScrambledDigit]Digit) {
+	for pre, post := range code {
+		fmt.Printf("%s->%s ", string(pre), string(post))
+	}
+	fmt.Printf("\n")
+}
+
 func main() {
 	InitPatterns()
 	linesText := util.ReadLines(os.Args[1])
+	sum := 0
 	for _, line := range linesText {
 		inOut := strings.Split(line, "|")
 		input := strings.TrimSpace(inOut[0])
 		output := strings.TrimSpace(inOut[1])
 
-		parts := strings.Split(output+" "+input, " ")
+		parts := strings.Split(input+" "+output, " ")
 		signals := util.Map(parts, MakeSignalPattern)
 
 		scramble := NewScramble()
@@ -264,7 +388,13 @@ func main() {
 		fmt.Printf("Find the seven/A:\n")
 		scramble.FindTheA()
 		scramble.PrintCandidates()
+
+		digits := scramble.TryAllMappings()
+		outputs := digits[len(digits)-4:]
+		num := 1000*outputs[0] + 100*outputs[1] + 10*outputs[2] + outputs[3]
+		fmt.Printf("outputs: %#v = %d\n", outputs, num)
+		sum += num
 	}
 
-	//
+	fmt.Printf("Sum: %d\n", sum)
 }
