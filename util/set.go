@@ -57,10 +57,8 @@ func (this Set[T]) Eq(other Set[T]) bool {
 
 func (this *Set[T]) Union(other Set[T]) {
 	for v := range other {
-		fmt.Printf("Adding %v\n", v)
 		(*this)[v] = true
 	}
-	fmt.Printf("this=%#v\n", *this)
 }
 
 func (this *Set[T]) Clone() Set[T] {
