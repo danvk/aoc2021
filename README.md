@@ -13,11 +13,15 @@ type ScrambledDigit byte
 type Digit byte
 ```
 
-Here's a Gopher who did this using a third-party `set` structure:
+Thinking more about this, a lot of the awkwardness came down to not having a nice set structure. Here's a Gopher who did this using a third-party library:
 https://github.com/microhod/adventofcode/blob/main/2021/08/main.go
 https://github.com/deckarep/golang-set
 
-I like this but wish it were generic!
+I like this but wish it were generic! I started playing around with building my own but got bogged down porting my solution to it. I'm sure this will come in useful again for future problems.
+
+It's interesting that you can do runtime type checks to get around some limitations of Go generics, e.g. to use a `String()` method on `T` to stringify `Set[T]`.
+
+I'm starting to think Go's niche for me personally might be command line tools.
 
 ### Day 7
 
