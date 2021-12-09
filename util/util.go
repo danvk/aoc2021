@@ -53,18 +53,6 @@ func MapErr[T any, U any](vals []T, fn func(T) (U, error)) ([]U, error) {
 	return us, nil
 }
 
-func MapBool[T any, U any](vals []T, fn func(T) (U, bool)) ([]U, bool) {
-	us := make([]U, len(vals))
-	for i, v := range vals {
-		u, ok := fn(v)
-		if !ok {
-			return nil, ok
-		}
-		us[i] = u
-	}
-	return us, true
-}
-
 func Filter[T any](vals []T, fn func(T) bool) []T {
 	result := []T{}
 	for _, v := range vals {
