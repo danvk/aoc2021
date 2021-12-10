@@ -2,6 +2,24 @@
 
 ## Advent of Code
 
+### Day 10
+
+I started with:
+
+```go
+type Chunk struct {
+	openChar    rune
+	start, stop int
+	children    []Chunk
+}
+```
+
+but then realized I just needed a stack for part 1. I'm glad I went with the simpler approach -- the remaining elements on the stack were just exactly what I needed for part 2. I embraced "rune"s today.
+
+### Day 9
+
+First problem using flood fill / BFS. From doing many whiteboard interviews and previous AoCs, this is definitely one I can implement! My `Set[T]` implementation from yesterday was moderately useful.
+
 ### Day 8
 
 Part two was the first puzzle that felt hard. I thought it was going to be _quite_ hard, but then saw that there were some consistent patterns to exploit that made things easier. I think my choice of data structures may have made this a bit harder on me, too.

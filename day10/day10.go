@@ -7,22 +7,23 @@ import (
 	"sort"
 )
 
-type Chunk struct {
-	openChar    rune
-	start, stop int
-	children    []Chunk
+var openToClose = map[rune]rune{
+	'(': ')',
+	'{': '}',
+	'<': '>',
+	'[': ']',
+}
+
+var scores = map[rune]int{
+	')': 1,
+	']': 2,
+	'}': 3,
+	'>': 4,
 }
 
 // Parse the line and return true, 0, completion score;
 // otherwise return false, first illegal char, 0
 func parseLine(line string) (bool, rune, int) {
-	openToClose := map[rune]rune{
-		'(': ')',
-		'{': '}',
-		'<': '>',
-		'[': ']',
-	}
-
 	stack := []rune{}
 	for _, c := range line {
 		if close, ok := openToClose[c]; ok {
@@ -34,12 +35,6 @@ func parseLine(line string) (bool, rune, int) {
 		}
 	}
 
-	scores := map[rune]int{
-		')': 1,
-		']': 2,
-		'}': 3,
-		'>': 4,
-	}
 	score := 0
 	for i := len(stack) - 1; i >= 0; i-- {
 		score *= 5
@@ -53,14 +48,14 @@ func parseLine(line string) (bool, rune, int) {
 	return true, 0, score
 }
 
-func main() {
-	charToPoints := map[rune]int{
-		')': 3,
-		']': 57,
-		'}': 1197,
-		'>': 25137,
-	}
+var charToPoints = map[rune]int{
+	')': 3,
+	']': 57,
+	'}': 1197,
+	'>': 25137,
+}
 
+func main() {
 	linesText := util.ReadLines(os.Args[1])
 	pointsTally := 0
 	scores := []int{}
