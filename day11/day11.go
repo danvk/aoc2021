@@ -43,20 +43,38 @@ func AdvanceOneStep(grid map[Coord]int) int {
 
 	totalFlashes := 0
 	newFlashes := 1
+	iters := 0
 	for newFlashes > 0 {
+		iters += 1
 		newFlashes = 0
 
-		for c, v := range grid {
-			if v > 9 && !flashed[c] {
-				newFlashes += 1
-				flashed[c] = true
-				for _, pos := range neighbors(c) {
-					grid[pos] += 1
+		for y := 0; y < 10; y++ {
+			for x := 0; x < 10; x++ {
+				c := Coord{x, y}
+				v := grid[c]
+				if v > 9 && !flashed[c] {
+					newFlashes += 1
+					flashed[c] = true
+					for _, pos := range neighbors(c) {
+						grid[pos] += 1
+					}
 				}
 			}
 		}
+		/*
+			for c, v := range grid {
+				if v > 9 && !flashed[c] {
+					newFlashes += 1
+					flashed[c] = true
+					for _, pos := range neighbors(c) {
+						grid[pos] += 1
+					}
+				}
+			}
+		*/
 
 		totalFlashes += newFlashes
+		// fmt.Printf("  %d: %d / %d\n", iters, newFlashes, totalFlashes)
 	}
 
 	for c, v := range grid {
@@ -96,6 +114,9 @@ func main() {
 		fmt.Printf("\nAfter 2 steps:\n")
 		PrintGrid(octopi)
 	*/
+
+	fmt.Printf("Initial grid:\n")
+	PrintGrid(octopi)
 
 	flashes := 0
 	for step := 1; step <= *numSteps; step++ {
