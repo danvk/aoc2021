@@ -2,6 +2,19 @@
 
 ## Advent of Code
 
+### Day 11
+
+I thought this struct would be the way to go:
+
+```go
+type Octopus struct {
+	val     int
+	flashed bool
+}
+```
+
+but you cannot assign to a field in a struct in a map in Go (<https://stackoverflow.com/questions/42605337/cannot-assign-to-struct-field-in-a-map>) which makes this extremely onerous.
+
 ### Day 10
 
 I started with:
