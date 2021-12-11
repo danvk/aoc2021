@@ -15,6 +15,8 @@ type Octopus struct {
 
 but you cannot assign to a field in a struct in a map in Go (<https://stackoverflow.com/questions/42605337/cannot-assign-to-struct-field-in-a-map>) which makes this extremely onerous.
 
+I ran into a very confusing bug where my grid diverged from the sample after 8 steps. But if I used the step 7 grid as the input, it got the first step right. It turned out to be an issue with Go's random order traversal of maps. But is this really an underspecified problem? Or maybe the issue was that I'm mutating a grid, rather than creating a new one within each substep?
+
 ### Day 10
 
 I started with:

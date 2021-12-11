@@ -2,8 +2,8 @@ package main
 
 import (
 	"aoc/util"
-	"flag"
 	"fmt"
+	"os"
 	"strconv"
 )
 
@@ -87,10 +87,10 @@ func AdvanceOneStep(grid map[Coord]int) int {
 }
 
 func main() {
-	numSteps := flag.Int("steps", 100, "number of steps to simulate")
-	flag.Parse()
+	// numSteps := flag.Int("steps", 100, "number of steps to simulate")
+	// flag.Parse()
 
-	linesText := util.ReadLines(flag.Args()[0])
+	linesText := util.ReadLines(os.Args[1])
 
 	octopi := make(map[Coord]int)
 	for y, line := range linesText {
@@ -118,12 +118,17 @@ func main() {
 	fmt.Printf("Initial grid:\n")
 	PrintGrid(octopi)
 
-	flashes := 0
-	for step := 1; step <= *numSteps; step++ {
-		flashes += AdvanceOneStep(octopi)
-		fmt.Printf("\nAfter %d step(s):\n", step)
-		PrintGrid(octopi)
-		fmt.Printf("%d flashes\n", flashes)
+	step := 1
+	for {
+		flashes := AdvanceOneStep(octopi)
+		fmt.Printf("Step %d: %d flashes\n", step, flashes)
+		if flashes == 100 {
+			fmt.Printf("All flash after %d steps\n", step)
+			break
+		}
+		// fmt.Printf("\nAfter %d step(s):\n", step)
+		// PrintGrid(octopi)
+		// fmt.Printf("%d flashes\n", flashes)
+		step++
 	}
-	fmt.Printf("Flashes after 100 steps: %d\n", flashes)
 }
