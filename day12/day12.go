@@ -9,8 +9,9 @@ import (
 )
 
 type Path struct {
-	pos     string
-	visited util.Set[string]
+	pos         string
+	visited     map[string]int
+	doubleVisit bool
 }
 
 func IsLower(s string) bool {
@@ -46,21 +47,23 @@ func main() {
 		connections[b].Add(a)
 	}
 
-	paths := []Path{{pos: "start", visited: util.Set[string]{}}}
+	paths := []Path{{pos: "start"}}
 	completePaths := []Path{}
 
 	for len(paths) > 0 {
 		newPaths := []Path{}
 		for _, path := range paths {
-			nexts, ok := connections[path.pos]
+			pos := path.pos
+			nexts, ok := connections[pos]
 			if !ok {
 				continue
 			}
 
 			for next := range nexts {
-				if !IsLower(next) || !path.visited[next] {
-					nextVisited := path.visited.Clone()
-					nextVisited.Add(path.pos)
+				count := path.visited[next]
+				if !IsLower(next) || count == 0 {
+					nextVisited := util.CopyMap(path.visited)
+					nextVisited[pos] += 1
 					newPath := Path{
 						pos:     next,
 						visited: nextVisited,

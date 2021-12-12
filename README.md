@@ -4,6 +4,18 @@
 
 TODO: move `Set` into its own package
 
+Why
+
+		paths := []Path{{pos: "start", visited: map[string]int{}}}
+
+and not
+
+		paths := []Path{{pos: "start", visited: {}}}
+
+I guess this is even shorter:
+
+		paths := []Path{{pos: "start"}}
+
 ### Day 11
 
 I thought this struct would be the way to go:
