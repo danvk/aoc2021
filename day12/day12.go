@@ -24,9 +24,6 @@ func IsLower(s string) bool {
 }
 
 func main() {
-	// numSteps := flag.Int("steps", 100, "number of steps to simulate")
-	// flag.Parse()
-
 	linesText := util.ReadLines(os.Args[1])
 
 	connections := make(map[string]util.Set[string])
