@@ -60,13 +60,18 @@ func main() {
 			}
 
 			for next := range nexts {
+				if next == "start" {
+					continue
+				}
 				count := path.visited[next]
-				if !IsLower(next) || count == 0 {
+				isSmallCave := IsLower(next)
+				if !isSmallCave || count == 0 || (count == 1 && !path.doubleVisit) {
 					nextVisited := util.CopyMap(path.visited)
 					nextVisited[pos] += 1
 					newPath := Path{
-						pos:     next,
-						visited: nextVisited,
+						pos:         next,
+						visited:     nextVisited,
+						doubleVisit: path.doubleVisit || (isSmallCave && count == 1),
 					}
 					if next == "end" {
 						completePaths = append(completePaths, newPath)
