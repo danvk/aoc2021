@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc/set"
 	"aoc/util"
 	"fmt"
 	"os"
@@ -23,11 +24,11 @@ func neighbors(pos Coord) []Coord {
 }
 
 func FindBasinSize(heights map[Coord]int, start Coord) int {
-	basin := util.SetFrom([]Coord{start})
+	basin := set.SetFrom([]Coord{start})
 	fringe := basin.Clone()
 
 	for len(fringe) > 0 {
-		newFringe := util.SetFrom([]Coord{})
+		newFringe := set.SetFrom([]Coord{})
 		for coord := range fringe {
 			for _, n := range neighbors(coord) {
 				v, ok := heights[n]

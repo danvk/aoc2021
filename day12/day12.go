@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc/set"
 	"aoc/util"
 	"fmt"
 	"os"
@@ -26,7 +27,7 @@ func IsLower(s string) bool {
 func main() {
 	linesText := util.ReadLines(os.Args[1])
 
-	connections := make(map[string]util.Set[string])
+	connections := make(map[string]set.Set[string])
 	for _, line := range linesText {
 		parts := strings.Split(line, "-")
 		if len(parts) != 2 {
@@ -35,10 +36,10 @@ func main() {
 		a := parts[0]
 		b := parts[1]
 		if _, ok := connections[a]; !ok {
-			connections[a] = util.Set[string]{}
+			connections[a] = set.Set[string]{}
 		}
 		if _, ok := connections[b]; !ok {
-			connections[b] = util.Set[string]{}
+			connections[b] = set.Set[string]{}
 		}
 		connections[a].Add(b)
 		connections[b].Add(a)

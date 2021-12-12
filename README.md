@@ -2,8 +2,6 @@
 
 ## Advent of Code
 
-TODO: move `Set` into its own package
-
 Why
 
 		paths := []Path{{pos: "start", visited: map[string]int{}}}
