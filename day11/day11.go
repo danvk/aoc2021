@@ -62,15 +62,17 @@ func AdvanceOneStep(grid map[Coord]int) int {
 			}
 		}
 		/*
-			for c, v := range grid {
-				if v > 9 && !flashed[c] {
-					newFlashes += 1
-					flashed[c] = true
-					for _, pos := range neighbors(c) {
-						grid[pos] += 1
+			// Doing the traversal this way produces the wrong answer for reasons that I'm not
+			// entirely sure of. Why does the traversal order matter?
+				for c, v := range grid {
+					if v > 9 && !flashed[c] {
+						newFlashes += 1
+						flashed[c] = true
+						for _, pos := range neighbors(c) {
+							grid[pos] += 1
+						}
 					}
 				}
-			}
 		*/
 
 		totalFlashes += newFlashes

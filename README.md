@@ -2,6 +2,8 @@
 
 ## Advent of Code
 
+TODO: move `Set` into its own package
+
 ### Day 11
 
 I thought this struct would be the way to go:
