@@ -4,7 +4,24 @@
 
 ### Day 13
 
-func Keys[K comparable, V any](m map[K]V) []K {
+Using a map from `Coord` -> `bool` is a good idea yet again.
+
+With
+
+		func Keys[K comparable](m map[K]interface{}) []K {
+
+this code produces an error:
+
+		func PrintDots(dots map[Coord]bool) {
+			keys := util.Keys(dots)
+		}
+		// type map[Coord]bool of dots does not match inferred type map[Coord]interface{} for map[K]interface{}
+
+whereas with this declaration it works:
+
+		func Keys[K comparable, V any](m map[K]V) []K {
+
+Is `any` not an alias for `interface{}`?
 
 ### Day 12
 
