@@ -1,6 +1,7 @@
 package main
 
 import (
+	c "aoc/coord"
 	"aoc/set"
 	"aoc/util"
 	"fmt"
@@ -9,28 +10,14 @@ import (
 	"strconv"
 )
 
-type Coord struct {
-	X, Y int
-}
-
-func neighbors(pos Coord) []Coord {
-	x, y := pos.X, pos.Y
-	return []Coord{
-		{x + 1, y},
-		{x - 1, y},
-		{x, y - 1},
-		{x, y + 1},
-	}
-}
-
-func FindBasinSize(heights map[Coord]int, start Coord) int {
-	basin := set.SetFrom([]Coord{start})
+func FindBasinSize(heights map[c.Coord]int, start c.Coord) int {
+	basin := set.SetFrom([]c.Coord{start})
 	fringe := basin.Clone()
 
 	for len(fringe) > 0 {
-		newFringe := set.SetFrom([]Coord{})
+		newFringe := set.SetFrom([]c.Coord{})
 		for coord := range fringe {
-			for _, n := range neighbors(coord) {
+			for _, n := range coord.Neighbors4() {
 				v, ok := heights[n]
 				if ok && v < 9 && !basin[n] {
 					newFringe.Add(n)
@@ -47,23 +34,23 @@ func FindBasinSize(heights map[Coord]int, start Coord) int {
 func main() {
 	linesText := util.ReadLines(os.Args[1])
 
-	heights := make(map[Coord]int)
+	heights := make(map[c.Coord]int)
 	for y, line := range linesText {
 		for x, digit := range line {
 			val, err := strconv.Atoi(string(digit))
 			if err != nil {
 				panic(err)
 			}
-			heights[Coord{x, y}] = val
+			heights[c.Coord{X: x, Y: y}] = val
 		}
 	}
 
 	sumHeights := 0
 	basinSizes := []int{}
-	mins := []Coord{}
+	mins := []c.Coord{}
 	for pos, height := range heights {
 		minNeighbor := height + 1
-		for _, p := range neighbors(pos) {
+		for _, p := range pos.Neighbors4() {
 			if v, ok := heights[p]; ok && v < minNeighbor {
 				minNeighbor = v
 			}

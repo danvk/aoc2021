@@ -23,7 +23,7 @@ whereas with this declaration it works:
 
 Is `any` not an alias for `interface{}`?
 
-Time to factor out a coord package.
+Time to factor out a coord package. I'm sure there are reasons, but it's a bit annoying that `Coord{x, y}` only works if `Coord` is defined in your own package. It has to be either `c.Coord{X, Y}` or `c.Coord{X: x, Y: y}` if it's defined in another package.
 
 ### Day 12
 
