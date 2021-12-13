@@ -21,6 +21,30 @@ func CoordY(c Coord) int {
 	return c.Y
 }
 
+func (c *Coord) Neighbors4() []Coord {
+	x, y := c.X, c.Y
+	return []Coord{
+		{x + 1, y},
+		{x - 1, y},
+		{x, y - 1},
+		{x, y + 1},
+	}
+}
+
+func (c *Coord) Neighbors8() []Coord {
+	x, y := c.X, c.Y
+	return []Coord{
+		{x + 1, y},
+		{x - 1, y},
+		{x, y - 1},
+		{x, y + 1},
+		{x + 1, y + 1},
+		{x + 1, y - 1},
+		{x - 1, y + 1},
+		{x - 1, y - 1},
+	}
+}
+
 func MaxXY[V any](m map[Coord]V) (int, int) {
 	maxX := util.Max(util.Map(util.Keys(m), CoordX))
 	maxY := util.Max(util.Map(util.Keys(m), CoordY))
