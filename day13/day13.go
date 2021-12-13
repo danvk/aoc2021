@@ -1,6 +1,7 @@
 package main
 
 import (
+	c "aoc/coord"
 	"aoc/util"
 	"fmt"
 	"os"
@@ -8,49 +9,32 @@ import (
 	"strings"
 )
 
-type Coord struct {
-	X, Y int
-}
-
-func FoldX(dots map[Coord]bool, x int) map[Coord]bool {
-	res := make(map[Coord]bool)
+func FoldX(dots map[c.Coord]bool, x int) map[c.Coord]bool {
+	res := make(map[c.Coord]bool)
 	for pos := range dots {
 		if pos.X <= x {
 			res[pos] = true
 		} else {
-			res[Coord{2*x - pos.X, pos.Y}] = true
+			res[c.New(2*x-pos.X, pos.Y)] = true
 		}
 	}
 	return res
 }
 
-func FoldY(dots map[Coord]bool, y int) map[Coord]bool {
-	res := make(map[Coord]bool)
+func FoldY(dots map[c.Coord]bool, y int) map[c.Coord]bool {
+	res := make(map[c.Coord]bool)
 	for pos := range dots {
 		if pos.Y <= y {
 			res[pos] = true
 		} else {
-			res[Coord{pos.X, 2*y - pos.Y}] = true
+			res[c.New(pos.X, 2*y-pos.Y)] = true
 		}
 	}
 	return res
 }
 
-func PrintDots(dots map[Coord]bool) {
-	maxX := util.Max(util.Map(util.Keys(dots), func(pos Coord) int { return pos.X }))
-	maxY := util.Max(util.Map(util.Keys(dots), func(pos Coord) int { return pos.Y }))
-
-	for y := 0; y <= maxY; y++ {
-		for x := 0; x <= maxX; x++ {
-			_, ok := dots[Coord{x, y}]
-			if ok {
-				fmt.Print("#")
-			} else {
-				fmt.Print(".")
-			}
-		}
-		fmt.Printf("\n")
-	}
+func PrintDots(dots map[c.Coord]bool) {
+	c.PrintGrid(dots, ".", func(v bool) string { return "#" })
 }
 
 func main() {
@@ -62,7 +46,7 @@ func main() {
 	dotsText := linesText[0]
 	foldsText := linesText[1]
 
-	dots := make(map[Coord]bool)
+	dots := make(map[c.Coord]bool)
 	for _, line := range dotsText {
 		parts, ok := util.MapErr(strings.Split(line, ","), strconv.Atoi)
 		if ok != nil || len(parts) != 2 {
@@ -70,7 +54,7 @@ func main() {
 		}
 		x := parts[0]
 		y := parts[1]
-		dots[Coord{x, y}] = true
+		dots[c.Coord{X: x, Y: y}] = true
 	}
 
 	for _, fold := range foldsText {

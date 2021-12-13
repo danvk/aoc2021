@@ -23,6 +23,8 @@ whereas with this declaration it works:
 
 Is `any` not an alias for `interface{}`?
 
+Time to factor out a coord package.
+
 ### Day 12
 
 Why
