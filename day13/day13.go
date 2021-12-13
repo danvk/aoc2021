@@ -36,6 +36,23 @@ func FoldY(dots map[Coord]bool, y int) map[Coord]bool {
 	return res
 }
 
+func PrintDots(dots map[Coord]bool) {
+	maxX := util.Max(util.Map(util.Keys(dots), func(pos Coord) int { return pos.X }))
+	maxY := util.Max(util.Map(util.Keys(dots), func(pos Coord) int { return pos.Y }))
+
+	for y := 0; y <= maxY; y++ {
+		for x := 0; x <= maxX; x++ {
+			_, ok := dots[Coord{x, y}]
+			if ok {
+				fmt.Print("#")
+			} else {
+				fmt.Print(".")
+			}
+		}
+		fmt.Printf("\n")
+	}
+}
+
 func main() {
 	linesText := util.ReadChunks(os.Args[1])
 	if len(linesText) != 2 {
@@ -74,4 +91,6 @@ func main() {
 
 		fmt.Printf("After %s num dots=%d\n", fold, len(dots))
 	}
+
+	PrintDots(dots)
 }

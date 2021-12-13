@@ -2,6 +2,12 @@
 
 ## Advent of Code
 
+### Day 13
+
+func Keys[K comparable, V any](m map[K]V) []K {
+
+### Day 12
+
 Why
 
 		paths := []Path{{pos: "start", visited: map[string]int{}}}
