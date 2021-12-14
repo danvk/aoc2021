@@ -24,6 +24,49 @@ func Advance(template string, rules map[string]rune) string {
 	return string(next)
 }
 
+func AdvanceMap(pairCounts map[string]int64, rules map[string]rune) map[string]int64 {
+	newCounts := make(map[string]int64)
+	for pair, count := range pairCounts {
+		post, ok := rules[pair]
+		if !ok {
+			panic(pair)
+		}
+		pre := []rune(pair)
+		a := pre[0]
+		b := pre[1]
+
+		newCounts[string([]rune{a, post})] += count
+		newCounts[string([]rune{post, b})] += count
+	}
+	return newCounts
+}
+
+func TemplateToPairs(template string) map[string]int64 {
+	chars := []rune(template)
+	res := make(map[string]int64)
+	for i := 1; i < len(chars); i++ {
+		two := string([]rune{chars[i-1], chars[i]})
+		res[two] += 1
+	}
+	return res
+}
+
+func GetCharCounts(initTemplate string, counts map[string]int64) map[rune]int64 {
+	out := make(map[rune]int64)
+	for pair, count := range counts {
+		chars := []rune(pair)
+		if len(chars) != 2 {
+			panic(pair)
+		}
+		b := chars[1]
+		out[b] += count
+	}
+
+	initRunes := []rune(initTemplate)
+	out[initRunes[0]] += 1
+	return out
+}
+
 func main() {
 	linesText := util.ReadChunks(os.Args[1])
 	if len(linesText) != 2 {
@@ -45,17 +88,15 @@ func main() {
 	}
 
 	fmt.Printf("Template: %s\n", template)
-	for step := 1; step <= 10; step++ {
-		template = Advance(template, rules)
+	pairs := TemplateToPairs(template)
+	for step := 1; step <= 40; step++ {
+		pairs = AdvanceMap(pairs, rules)
 		if step <= 4 {
-			fmt.Printf("%d: %s\n", step, template)
+			fmt.Printf("%d: %#v\n", step, pairs)
 		}
 	}
 
-	counts := make(map[rune]int)
-	for _, c := range template {
-		counts[c] += 1
-	}
+	counts := GetCharCounts(template, pairs)
 	syms := util.Keys(counts)
 	fmt.Printf("syms: %#v\n", syms)
 	sort.Slice(syms, func(i, j int) bool {
