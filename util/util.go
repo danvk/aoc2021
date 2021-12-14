@@ -252,7 +252,7 @@ func CopyMap[K comparable, V any](m map[K]V) map[K]V {
 }
 
 func Keys[K comparable, V any](m map[K]V) []K {
-	out := make([]K, len(m))
+	out := make([]K, 0)
 	for k := range m {
 		out = append(out, k)
 	}
