@@ -2,17 +2,16 @@ package main
 
 import (
 	c "aoc/coord"
-	"aoc/set"
 	"aoc/util"
 	"fmt"
 	"os"
 	"strconv"
 )
 
-type Path struct {
-	visited set.Set[c.Coord]
-	tip     c.Coord
-	risk    int
+func PrintGrid(risks map[c.Coord]int) {
+	c.PrintGrid(risks, ".", func(risk int) string {
+		return strconv.Itoa(risk)
+	})
 }
 
 func main() {
@@ -28,9 +27,7 @@ func main() {
 			risks[c.Coord{X: x, Y: y}] = val
 		}
 	}
-	c.PrintGrid(risks, ".", func(risk int) string {
-		return strconv.Itoa(risk)
-	})
+	PrintGrid(risks)
 
 	end := c.MaxXY(risks)
 	maxX, maxY := end.X+1, end.Y+1
@@ -50,9 +47,7 @@ func main() {
 		}
 	}
 	risks = nr
-	c.PrintGrid(risks, ".", func(risk int) string {
-		return strconv.Itoa(risk)
-	})
+	PrintGrid(risks)
 
 	end = c.MaxXY(risks)
 	maxX, maxY = end.X+1, end.Y+1
