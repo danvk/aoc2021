@@ -2,6 +2,18 @@
 
 ## Advent of Code
 
+### Day 15
+
+My first attempt at a solution involved keeping track of all the paths through the grid as I did a BFS and pruning once I got the first complete path. This didn't scale at all. Instead I figured I could do Dijkstra: keep track of the minimum distance to each node in the graph, and only add that node to the fringe if you reduce the distance.
+
+Part two was challenging because you really had to read the question carefully: it's not just `risk%10` because it wraps around to `1` not `0`.
+
+Definitely happy that I factored out a `coord` package a few days ago!
+
+### Day 14
+
+I enjoyed today's! My part 1 solution really didn't scale for part 2. Updating it to just keep track of the counts of each pair was simple enough, but I had an "oh crap" moment as I was trying to count the _individual_ molecules to get the final answer. Then I realized that you can just count the second molecule in each pair, and treat the first molecule in the template (which is fixed) specially.
+
 ### Day 13
 
 Using a map from `Coord` -> `bool` is a good idea yet again.
