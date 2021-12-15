@@ -10,6 +10,20 @@ Part two was challenging because you really had to read the question carefully: 
 
 Definitely happy that I factored out a `coord` package a few days ago!
 
+I looked at this graph package but I wish it were generic! I think this will really force Go developers to update their packages and create opportunities for new ones <https://pkg.go.dev/github.com/yourbasic/graph>.
+
+I'm trying to write my own Dijkstra using `containers/heap`. One head scratcher: this method makes my heap not match the interface:
+
+		func (h *THeap[T]) Pop() NodeWithCost[T]{}
+
+instead Go wants:
+
+		func (h *THeap[T]) Pop() interface{}
+
+which you'd think would be matched by mine.
+
+Generic Dijkstra works pretty well! And it's faster than what I wrote before because it uses the heap structure to visit nodes in order of increasing risk.
+
 ### Day 14
 
 I enjoyed today's! My part 1 solution really didn't scale for part 2. Updating it to just keep track of the counts of each pair was simple enough, but I had an "oh crap" moment as I was trying to count the _individual_ molecules to get the final answer. Then I realized that you can just count the second molecule in each pair, and treat the first molecule in the template (which is fixed) specially.
