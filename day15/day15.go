@@ -28,8 +28,35 @@ func main() {
 			risks[c.Coord{X: x, Y: y}] = val
 		}
 	}
+	c.PrintGrid(risks, ".", func(risk int) string {
+		return strconv.Itoa(risk)
+	})
 
 	end := c.MaxXY(risks)
+	maxX, maxY := end.X+1, end.Y+1
+	fmt.Printf("maxX, maxY = %d, %d\n", maxX, maxY)
+
+	nr := make(map[c.Coord]int)
+	for rx := 0; rx <= 4; rx++ {
+		for ry := 0; ry <= 4; ry++ {
+			for pos, risk := range risks {
+				x, y := pos.X, pos.Y
+				nextRisk := (risk + rx + ry)
+				if nextRisk > 9 {
+					nextRisk -= 9
+				}
+				nr[c.Coord{X: x + rx*maxX, Y: y + ry*maxY}] = nextRisk
+			}
+		}
+	}
+	risks = nr
+	c.PrintGrid(risks, ".", func(risk int) string {
+		return strconv.Itoa(risk)
+	})
+
+	end = c.MaxXY(risks)
+	maxX, maxY = end.X+1, end.Y+1
+	fmt.Printf("maxX, maxY = %d, %d\n", maxX, maxY)
 
 	minRisk := 0
 	// Come up with a good upper bound for minimum risk
