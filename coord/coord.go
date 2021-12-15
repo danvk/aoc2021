@@ -45,15 +45,16 @@ func (c *Coord) Neighbors8() []Coord {
 	}
 }
 
-func MaxXY[V any](m map[Coord]V) (int, int) {
+func MaxXY[V any](m map[Coord]V) Coord {
 	maxX := util.Max(util.Map(util.Keys(m), CoordX))
 	maxY := util.Max(util.Map(util.Keys(m), CoordY))
 
-	return maxX, maxY
+	return Coord{maxX, maxY}
 }
 
 func PrintGrid[V any](m map[Coord]V, blank string, printer func(v V) string) {
-	maxX, maxY := MaxXY(m)
+	c := MaxXY(m)
+	maxX, maxY := c.X, c.Y
 
 	for y := 0; y <= maxY; y++ {
 		for x := 0; x <= maxX; x++ {

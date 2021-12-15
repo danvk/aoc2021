@@ -113,6 +113,12 @@ func (this Set[T]) Add(el T) {
 	this[el] = true
 }
 
+func (this Set[T]) CloneAndAdd(el T) Set[T] {
+	n := this.Clone()
+	n.Add(el)
+	return n
+}
+
 func (this Set[T]) Remove(el T) {
 	delete(this, el)
 }
@@ -123,4 +129,9 @@ func (this Set[T]) AsSlice() []T {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func (this Set[T]) Contains(el T) bool {
+	_, ok := this[el]
+	return ok
 }
