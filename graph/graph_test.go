@@ -2,6 +2,7 @@ package graph
 
 import (
 	"aoc/util"
+	"reflect"
 	"testing"
 )
 
@@ -25,8 +26,8 @@ func TestDijkstra(t *testing.T) {
 		"c": {"d"},
 	}
 
-	actual := Dijkstra[string](g, "a", "d")
-	if actual != 2 {
-		t.Errorf("Dijkstra(g, a, b) = %d want 2", actual)
+	actual, path := Dijkstra[string](g, "a", "d")
+	if actual != 2 || !reflect.DeepEqual(path, []string{"a", "b", "d"}) {
+		t.Errorf("Dijkstra(g, a, b) = %d, %s want 2, a->b->d", actual, path)
 	}
 }

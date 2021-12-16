@@ -124,7 +124,7 @@ func main() {
 	*/
 
 	start := c.Coord{X: 0, Y: 0}
-	minRisk := graph.Dijkstra[c.Coord](risks, start, end)
+	minRisk, _ := graph.Dijkstra[c.Coord](risks, start, end)
 
 	fmt.Printf("Min Risk: %d\n", minRisk)
 }
