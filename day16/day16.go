@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc/util"
 	"fmt"
 	"os"
 	"strconv"
@@ -72,6 +73,65 @@ func (p Packet) VersionSum() int64 {
 	return sum
 }
 
+func (p Packet) Evaluate() int64 {
+	if p.typeId == 4 {
+		return p.value
+	}
+
+	vals := util.Map(p.packets, Packet.Evaluate)
+
+	switch p.typeId {
+	case 0:
+		// Sum
+		return util.Sum(vals)
+	case 1:
+		// product packets
+		var product int64 = 1
+		for _, val := range vals {
+			product *= val
+		}
+		return product
+	case 2:
+		// minimum
+		return util.Min(vals)
+	case 3:
+		// maximum
+		return util.Max(vals)
+	case 4:
+		// literal
+		panic(p)
+	case 5:
+		// greater than
+		if len(vals) != 2 {
+			panic(p)
+		}
+		if vals[0] > vals[1] {
+			return 1
+		}
+		return 0
+	case 6:
+		// less than
+		if len(vals) != 2 {
+			panic(p)
+		}
+		if vals[0] < vals[1] {
+			return 1
+		}
+		return 0
+	case 7:
+		// equal to
+		if len(vals) != 2 {
+			panic(p)
+		}
+		if vals[0] == vals[1] {
+			return 1
+		}
+		return 0
+	default:
+		panic(p)
+	}
+}
+
 func (b *BitString) DecodePacket() Packet {
 	version := b.PopAndDecode(3)
 	typeId := b.PopAndDecode(3)
@@ -94,7 +154,6 @@ func (b *BitString) DecodePacket() Packet {
 	} else {
 		// operator
 		lengthTypeId := b.PopBits(1)[0]
-		fmt.Printf("Length type id: %s\n", lengthTypeId)
 		var subPackets []Packet
 		if lengthTypeId == "0" {
 			// the next 15 bits are a number that represents the total length in bits of the sub-packets contained by this packet.
@@ -134,6 +193,7 @@ func main() {
 	}
 
 	packet := bits.DecodePacket()
-	fmt.Printf("Read %s -> %#v\n", hex, packet)
+	// fmt.Printf("Read %s -> %#v\n", hex, packet)
 	fmt.Printf("Version Sum: %d\n", packet.VersionSum())
+	fmt.Printf("Evaluates to: %d\n", packet.Evaluate())
 }
