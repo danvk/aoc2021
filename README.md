@@ -2,6 +2,11 @@
 
 ## Advent of Code
 
+### Day 17
+
+First wrong answer on part 2! 3092 is too low.
+It turned out to be a `<` that should have been a `<=` in my calculation of the minimum possible `vx`. This mattered for my puzzle input but not for the sample input.
+
 ### Day 16
 
 Using a slice of strings that are `"0"` or `"1"` is inefficient but extremely convenient here. Writing out `PopBits` and `PopAndDecode` helpers early made this pretty straightforward.

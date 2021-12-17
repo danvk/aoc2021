@@ -65,30 +65,37 @@ func main() {
 	var minVx int
 	for vx := 1; vx <= xMin; vx++ {
 		fmt.Printf("vx: %3d final x: %4d\n", vx, finalX(vx))
-		if finalX(vx) > xMin {
+		if finalX(vx) >= xMin {
 			minVx = vx
 			break
 		}
 	}
+	fmt.Printf("minVx: %d\n", minVx)
 
 	// m := maxHeight(6, 3, xMin, xMax, yMin, yMax)
 	// fmt.Printf("%d\n", m)
 
 	best := 0
-	for vx := minVx; vx < xMin; vx++ {
+	count := 0
+	for vx := minVx; vx <= xMax; vx++ {
 		// what's the right upper bound here?
-		for vy := 1; vy <= 1000; vy++ {
+		for vy := -10000; vy <= 10000; vy++ {
 			// fmt.Printf("%d, %d\n", vx, vy)
 			m := maxHeight(vx, vy, xMin, xMax, yMin, yMax)
 			if m >= 0 {
-				fmt.Printf("v: %3d, %3d max height: %4d\n", vx, vy, m)
+				count++
+				// if vx < minVx {
+				// 	fmt.Printf("v: %3d, %3d max height: %4d\n", vx, vy, m)
+				// 	fmt.Printf("  finalX: %d\n", finalX(vx))
+				// }
 				if m > best {
 					best = m
-					fmt.Printf("  best so far!\n")
+					// fmt.Printf("  best so far!\n")
 				}
 			}
 		}
 	}
 
 	fmt.Printf("Max height: %d\n", best)
+	fmt.Printf("Num Distinct: %d\n", count)
 }
