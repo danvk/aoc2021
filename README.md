@@ -18,6 +18,8 @@ becomes this:
 
 Neat! <https://stackoverflow.com/a/38897667/388951>
 
+Why do my `Init()` functions never get called?
+
 ### Day 15
 
 My first attempt at a solution involved keeping track of all the paths through the grid as I did a BFS and pruning once I got the first complete path. This didn't scale at all. Instead I figured I could do Dijkstra: keep track of the minimum distance to each node in the graph, and only add that node to the fringe if you reduce the distance.
