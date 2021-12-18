@@ -10,6 +10,8 @@ In retrospect, I think a better solution would have been to simultaneously maint
 
 I reworked the problem with this approach. There is a bit more bookkeeping, but I do think overall it's much simpler.
 
+I set up some boilerplate for "table-driven" tests following <https://dave.cheney.net/2019/05/07/prefer-table-driven-tests>.
+
 ### Day 17
 
 First wrong answer on part 2! 3092 is too low.
