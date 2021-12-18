@@ -33,6 +33,12 @@ func TestExplode(t *testing.T) {
 			p, r, expL, expR, exploded,
 		)
 	}
+
+	p, _ = ParsePair("[[[[[1,1],[2,2]],[3,3]],[4,4]],[5,5]]")
+	//                [[[[    0, [3,2]],[3,3]],[4,4]],[5,5]]
+	//                    [[[[0, [3,2]],[4,3]],[5,4]],[6,5]]
+	r, expL, expR, exploded = p.Explode(0)
+
 }
 
 func TestSplit(t *testing.T) {

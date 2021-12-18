@@ -29,7 +29,9 @@ func (p Pair) Add(other Pair) Pair {
 	}
 
 	fmt.Printf("Sum: %s\n", sum)
-	return sum.Reduce()
+	reduced := sum.Reduce()
+	fmt.Printf("  -> %s\n", reduced)
+	return reduced
 }
 
 func (p Pair) IsValue() bool {
@@ -58,6 +60,7 @@ func (p Pair) Explode(depth int) (Pair, *int, *int, bool) {
 		if expR != nil {
 			newRight := right.ExplodeDownLeft(*expR)
 			right = &newRight
+			expR = nil
 		}
 		return Pair{left: &left, right: right}, expL, expR, exploded
 	}
@@ -72,6 +75,7 @@ func (p Pair) Explode(depth int) (Pair, *int, *int, bool) {
 		if expL != nil {
 			newLeft := left.ExplodeDownRight(*expL)
 			left = &newLeft
+			expL = nil
 		}
 		return Pair{left: left, right: &right}, expL, expR, exploded
 	}
@@ -118,9 +122,13 @@ func (p Pair) Split() (Pair, bool) {
 func (p Pair) ReduceOnce() (Pair, bool) {
 	np, _, _, exploded := p.Explode(0)
 	if exploded {
+		fmt.Printf("  explode! -> %s\n", np)
 		return np, true
 	}
 	np, split := p.Split()
+	if split {
+		fmt.Printf("  split! -> %s\n", np)
+	}
 	return np, split
 }
 
@@ -187,15 +195,6 @@ func main() {
 		}
 	}
 	fmt.Printf("Sum: %s\n", pair)
-
-	for {
-		np, reduced := pair.ReduceOnce()
-		// fmt.Printf("%s -> %s, %v\n", pair, np, reduced)
-		if !reduced {
-			break
-		}
-		pair = &np
-	}
 
 	fmt.Printf("Final pair: %s\n", pair)
 	fmt.Printf("Magnitude: %d\n", pair.Magnitude())
