@@ -10,9 +10,11 @@ import (
 
 // ADT would be nice for this!
 type Pair struct {
-	value int
-	left  *Pair
-	right *Pair
+	value  int
+	index  int // only for values
+	left   *Pair
+	right  *Pair
+	parent *Pair
 }
 
 func (p Pair) String() string {
@@ -22,123 +24,110 @@ func (p Pair) String() string {
 	return strconv.Itoa(p.value)
 }
 
-func (p Pair) Add(other Pair) Pair {
-	sum := Pair{
-		left:  &p,
-		right: &other,
+func (p *Pair) ReIndex(start int) int {
+	if p.IsValue() {
+		p.index = start
+		return start + 1
 	}
+	start = p.left.ReIndex(start)
+	return p.right.ReIndex(start)
+}
 
-	// fmt.Printf("Sum: %s\n", sum)
-	reduced := sum.Reduce()
-	// fmt.Printf("  -> %s\n", reduced)
-	return reduced
+func (p *Pair) SetParents() {
+	if !p.IsValue() {
+		p.left.parent = p
+		p.right.parent = p
+		p.left.SetParents()
+		p.right.SetParents()
+	}
+}
+
+func (p *Pair) Add(other *Pair) *Pair {
+	sum := &Pair{
+		left:  p,
+		right: other,
+	}
+	sum.left.parent = sum
+	sum.right.parent = sum
+	sum.ReIndex(0)
+	// fmt.Printf("  sum: %s\n", sum)
+	sum.Reduce()
+	return sum
 }
 
 func (p Pair) IsValue() bool {
 	return p.left == nil
 }
 
-// Returns new pair, exploding left, exploding right, was there an explosion?
-func (p Pair) Explode(depth int) (Pair, *int, *int, bool) {
+func (p *Pair) FindFirstRegular(depth int) *Pair {
 	if p.IsValue() {
-		return p, nil, nil, false
-	}
-	if p.left.IsValue() && p.right.IsValue() && depth >= 4 {
-		// this is a pair of two values; explode it!
-		// fmt.Printf("Explode! %s, depth=%d\n", p, depth)
-		return Pair{value: 0}, &p.left.value, &p.right.value, true
-	}
-
-	// Try to explode the left
-	left, expL, expR, exploded := p.left.Explode(depth + 1)
-	if expR != nil && p.right.IsValue() {
-		// There's an explosion! And we can handle the right part.
-		return Pair{left: &left, right: &Pair{value: p.right.value + *expR}}, expL, nil, exploded
-	}
-	if exploded {
-		right := p.right
-		if expR != nil {
-			newRight := right.ExplodeDownLeft(*expR)
-			right = &newRight
-			expR = nil
+		if depth >= 5 {
+			return p.parent
 		}
-		return Pair{left: &left, right: right}, expL, expR, exploded
+		return nil
 	}
-
-	right, expL, expR, exploded := p.right.Explode(depth + 1)
-	if expL != nil && p.left.IsValue() {
-		// There's an explosion and we can handle the left part.
-		return Pair{left: &Pair{value: p.left.value + *expL}, right: &right}, nil, expR, exploded
+	if r := p.left.FindFirstRegular(depth + 1); r != nil {
+		return r
 	}
-	if exploded {
-		left := p.left
-		if expL != nil {
-			newLeft := left.ExplodeDownRight(*expL)
-			left = &newLeft
-			expL = nil
-		}
-		return Pair{left: left, right: &right}, expL, expR, exploded
-	}
-
-	// No explosions! We're unchanged.
-	return p, nil, nil, false
+	return p.right.FindFirstRegular(depth + 1)
 }
 
-func (p Pair) ExplodeDownLeft(val int) Pair {
-	if p.IsValue() {
-		return Pair{value: p.value + val}
-	}
-	newLeft := p.left.ExplodeDownLeft(val)
-	return Pair{left: &newLeft, right: p.right}
-}
-
-func (p Pair) ExplodeDownRight(val int) Pair {
-	if p.IsValue() {
-		return Pair{value: p.value + val}
-	}
-	newRight := p.right.ExplodeDownRight(val)
-	return Pair{left: p.left, right: &newRight}
-}
-
-func (p Pair) Split() (Pair, bool) {
+// Invalidates index & parent
+func (p *Pair) Split() bool {
 	if p.IsValue() {
 		v := p.value
 		if v < 10 {
-			return p, false
+			return false
 		}
-		if v%2 == 0 {
-			return Pair{left: &Pair{value: v / 2}, right: &Pair{value: v / 2}}, true
-		}
-		return Pair{left: &Pair{value: (v - 1) / 2}, right: &Pair{value: (v + 1) / 2}}, true
+		m := v % 2
+		left := (v - m) / 2
+		right := (v + m) / 2
+		p.left = &Pair{value: left}
+		p.right = &Pair{value: right}
+		return true
 	}
-	newLeft, split := p.left.Split()
-	if split {
-		return Pair{left: &newLeft, right: p.right}, true
-	}
-	newRight, split := p.right.Split()
-	return Pair{left: p.left, right: &newRight}, split
+	return p.left.Split() || p.right.Split()
 }
 
-func (p Pair) ReduceOnce() (Pair, bool) {
-	np, _, _, exploded := p.Explode(0)
-	if exploded {
-		// fmt.Printf("  explode! -> %s\n", np)
-		return np, true
+func (p *Pair) AddByIndex(updates map[int]int) {
+	if p.IsValue() {
+		update, ok := updates[p.index]
+		if ok {
+			p.value += update
+		}
+	} else {
+		p.left.AddByIndex(updates)
+		p.right.AddByIndex(updates)
 	}
-	np, split := p.Split()
-	// if split {
-	// 	fmt.Printf("  split! -> %s\n", np)
-	// }
-	return np, split
 }
 
-func (p Pair) Reduce() Pair {
-	for {
-		np, reduced := p.ReduceOnce()
-		if !reduced {
-			return p
-		}
-		p = np
+func (p *Pair) ReduceOnce() bool {
+	rp := p.FindFirstRegular(0)
+	if rp != nil {
+		// fmt.Printf("  explode! First regular: %s\n", *rp)
+		updates := map[int]int{rp.left.index - 1: rp.left.value, rp.right.index + 1: rp.right.value}
+		// fmt.Printf("    updates: %#v\n", updates)
+		p.AddByIndex(updates)
+		// fmt.Printf("   --> %s\n", *p)
+		rp.value = 0
+		rp.left = nil
+		rp.right = nil
+		p.ReIndex(0)
+		// fmt.Printf("  --> %s\n", *p)
+		return true
+	}
+
+	if p.Split() {
+		// fmt.Printf("  split! %s\n", *p)
+		p.SetParents()
+		p.ReIndex(0)
+		return true
+	}
+	return false
+}
+
+func (p *Pair) Reduce() {
+	for p.ReduceOnce() {
 	}
 }
 
@@ -177,20 +166,27 @@ func ParsePair(text string) (Pair, string) {
 	return Pair{value: value}, text[pos[1]:]
 }
 
+func Parse(text string) *Pair {
+	pair, rest := ParsePair(text)
+	if len(rest) != 0 {
+		panic(text)
+	}
+	pair.ReIndex(0)
+	pair.SetParents()
+	return &pair
+}
+
 func Part1(linesText []string) {
 	var pair *Pair
 	for _, line := range linesText {
-		// for _, line := range []string{os.Args[1]} {
-		thisPair, rest := ParsePair(line)
-		if len(rest) != 0 {
-			panic(line)
-		}
+		thisPair := Parse(line)
+
 		if pair == nil {
-			pair = &thisPair
+			pair = thisPair
 		} else {
-			result := pair.Add(thisPair)
-			pair = &result
+			pair = pair.Add(thisPair)
 		}
+		// fmt.Printf("Reduced: %s\n", pair)
 	}
 	fmt.Printf("Sum: %s\n", pair)
 
@@ -198,28 +194,16 @@ func Part1(linesText []string) {
 	fmt.Printf("Magnitude: %d\n", pair.Magnitude())
 }
 
-func main() {
-	linesText := util.ReadLines(os.Args[1])
-
-	// Part1(linesText)
-	var pairs []Pair
-	for _, line := range linesText {
-		// for _, line := range []string{os.Args[1]} {
-		pair, rest := ParsePair(line)
-		if len(rest) != 0 {
-			panic(line)
-		}
-		pairs = append(pairs, pair)
-	}
-
+func Part2(linesText []string) {
 	topMag := -1
-	for i := 0; i < len(pairs); i++ {
-		for j := 0; j < len(pairs); j++ {
+	for i := 0; i < len(linesText); i++ {
+		for j := 0; j < len(linesText); j++ {
 			if i == j {
 				continue
 			}
-			pair1 := pairs[i]
-			pair2 := pairs[j]
+			// Could implement Pair.Clone(), but this is very convenient!
+			pair1 := Parse(linesText[i])
+			pair2 := Parse(linesText[j])
 			sum := pair1.Add(pair2)
 			mag := sum.Magnitude()
 			if mag > topMag {
@@ -228,4 +212,11 @@ func main() {
 		}
 	}
 	fmt.Printf("Top magnitude: %d\n", topMag)
+}
+
+func main() {
+	linesText := util.ReadLines(os.Args[1])
+
+	Part1(linesText)
+	Part2(linesText)
 }
