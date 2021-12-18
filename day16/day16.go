@@ -10,7 +10,7 @@ import (
 
 var BITS map[string]string
 
-func Init() {
+func init() {
 	BITS = map[string]string{
 		"0": "0000",
 		"1": "0001",
@@ -180,7 +180,6 @@ func (b *BitString) DecodePacket() Packet {
 }
 
 func main() {
-	Init()
 	hex := os.Args[1]
 	chars := strings.Split(hex, "")
 	var bits BitString
