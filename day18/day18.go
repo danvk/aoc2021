@@ -28,9 +28,9 @@ func (p Pair) Add(other Pair) Pair {
 		right: &other,
 	}
 
-	fmt.Printf("Sum: %s\n", sum)
+	// fmt.Printf("Sum: %s\n", sum)
 	reduced := sum.Reduce()
-	fmt.Printf("  -> %s\n", reduced)
+	// fmt.Printf("  -> %s\n", reduced)
 	return reduced
 }
 
@@ -122,13 +122,13 @@ func (p Pair) Split() (Pair, bool) {
 func (p Pair) ReduceOnce() (Pair, bool) {
 	np, _, _, exploded := p.Explode(0)
 	if exploded {
-		fmt.Printf("  explode! -> %s\n", np)
+		// fmt.Printf("  explode! -> %s\n", np)
 		return np, true
 	}
 	np, split := p.Split()
-	if split {
-		fmt.Printf("  split! -> %s\n", np)
-	}
+	// if split {
+	// 	fmt.Printf("  split! -> %s\n", np)
+	// }
 	return np, split
 }
 
@@ -177,9 +177,7 @@ func ParsePair(text string) (Pair, string) {
 	return Pair{value: value}, text[pos[1]:]
 }
 
-func main() {
-	linesText := util.ReadLines(os.Args[1])
-
+func Part1(linesText []string) {
 	var pair *Pair
 	for _, line := range linesText {
 		// for _, line := range []string{os.Args[1]} {
@@ -198,4 +196,36 @@ func main() {
 
 	fmt.Printf("Final pair: %s\n", pair)
 	fmt.Printf("Magnitude: %d\n", pair.Magnitude())
+}
+
+func main() {
+	linesText := util.ReadLines(os.Args[1])
+
+	// Part1(linesText)
+	var pairs []Pair
+	for _, line := range linesText {
+		// for _, line := range []string{os.Args[1]} {
+		pair, rest := ParsePair(line)
+		if len(rest) != 0 {
+			panic(line)
+		}
+		pairs = append(pairs, pair)
+	}
+
+	topMag := -1
+	for i := 0; i < len(pairs); i++ {
+		for j := 0; j < len(pairs); j++ {
+			if i == j {
+				continue
+			}
+			pair1 := pairs[i]
+			pair2 := pairs[j]
+			sum := pair1.Add(pair2)
+			mag := sum.Magnitude()
+			if mag > topMag {
+				topMag = mag
+			}
+		}
+	}
+	fmt.Printf("Top magnitude: %d\n", topMag)
 }
