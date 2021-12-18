@@ -6,7 +6,7 @@
 
 Quite a slog today -- I missed that you had to reduce after _each_ addition, rather than after all the additions. I also had a bug where I added the exploded numbers to _all_ the numbers on either side, rather than just the first.
 
-In retrospect, I think a better solution would have been to simultaneously maintain a linear order and tree structure. Storing a pointer to parent also seems very helpful, though this is tricky in Go with its pass by value.
+In retrospect, I think a better solution would have been to simultaneously maintain a linear order and tree structure. Storing a pointer to parent also seems very helpful, though this is tricky in Go with its pass by value. They are "contagious" in that, once you start using pointers, you more or less have to use them everywhere if you want to maintain pointer equality.
 
 I reworked the problem with this approach. There is a bit more bookkeeping, but I do think overall it's much simpler.
 
