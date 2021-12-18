@@ -33,5 +33,24 @@ func TestExplode(t *testing.T) {
 			p, r, expL, expR, exploded,
 		)
 	}
+}
 
+func TestSplit(t *testing.T) {
+	p, _ := ParsePair("10")
+	r, split := p.Split()
+	if !split || r.String() != "[5,5]" {
+		t.Errorf("%s.Split() = %s, %v want [5,5], true", p, r, split)
+	}
+
+	p, _ = ParsePair("11")
+	r, split = p.Split()
+	if !split || r.String() != "[5,6]" {
+		t.Errorf("%s.Split() = %s, %v want [5,6], true", p, r, split)
+	}
+
+	p, _ = ParsePair("9")
+	r, split = p.Split()
+	if split || r.String() != "9" {
+		t.Errorf("%s.Split() = %s, %v want 9, false", p, r, split)
+	}
 }

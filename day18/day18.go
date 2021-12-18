@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc/util"
 	"fmt"
 	"os"
 	"regexp"
@@ -22,10 +23,13 @@ func (p Pair) String() string {
 }
 
 func (p Pair) Add(other Pair) Pair {
-	return Pair{
+	sum := Pair{
 		left:  &p,
 		right: &other,
 	}
+
+	fmt.Printf("Sum: %s\n", sum)
+	return sum.Reduce()
 }
 
 func (p Pair) IsValue() bool {
@@ -39,7 +43,7 @@ func (p Pair) Explode(depth int) (Pair, *int, *int, bool) {
 	}
 	if p.left.IsValue() && p.right.IsValue() && depth >= 4 {
 		// this is a pair of two values; explode it!
-		fmt.Printf("Explode! %s, depth=%d\n", p, depth)
+		// fmt.Printf("Explode! %s, depth=%d\n", p, depth)
 		return Pair{value: 0}, &p.left.value, &p.right.value, true
 	}
 
@@ -92,15 +96,49 @@ func (p Pair) ExplodeDownRight(val int) Pair {
 	return Pair{left: p.left, right: &newRight}
 }
 
-func (p Pair) ReduceOnce() (Pair, bool) {
+func (p Pair) Split() (Pair, bool) {
 	if p.IsValue() {
-		return p, false
+		v := p.value
+		if v < 10 {
+			return p, false
+		}
+		if v%2 == 0 {
+			return Pair{left: &Pair{value: v / 2}, right: &Pair{value: v / 2}}, true
+		}
+		return Pair{left: &Pair{value: (v - 1) / 2}, right: &Pair{value: (v + 1) / 2}}, true
 	}
+	newLeft, split := p.left.Split()
+	if split {
+		return Pair{left: &newLeft, right: p.right}, true
+	}
+	newRight, split := p.right.Split()
+	return Pair{left: p.left, right: &newRight}, split
+}
+
+func (p Pair) ReduceOnce() (Pair, bool) {
 	np, _, _, exploded := p.Explode(0)
 	if exploded {
 		return np, true
 	}
-	return p, false
+	np, split := p.Split()
+	return np, split
+}
+
+func (p Pair) Reduce() Pair {
+	for {
+		np, reduced := p.ReduceOnce()
+		if !reduced {
+			return p
+		}
+		p = np
+	}
+}
+
+func (p Pair) Magnitude() int {
+	if p.IsValue() {
+		return p.value
+	}
+	return 3*p.left.Magnitude() + 2*p.right.Magnitude()
 }
 
 var NumPat = regexp.MustCompile("\\d+")
@@ -132,16 +170,33 @@ func ParsePair(text string) (Pair, string) {
 }
 
 func main() {
-	// linesText := util.ReadLines(os.Args[1])
+	linesText := util.ReadLines(os.Args[1])
 
-	// for _, line := range linesText {
-	for _, line := range []string{os.Args[1]} {
-		pair, rest := ParsePair(line)
+	var pair *Pair
+	for _, line := range linesText {
+		// for _, line := range []string{os.Args[1]} {
+		thisPair, rest := ParsePair(line)
 		if len(rest) != 0 {
 			panic(line)
 		}
-
-		np, reduced := pair.ReduceOnce()
-		fmt.Printf("%s -> %s, %v\n", pair, np, reduced)
+		if pair == nil {
+			pair = &thisPair
+		} else {
+			result := pair.Add(thisPair)
+			pair = &result
+		}
 	}
+	fmt.Printf("Sum: %s\n", pair)
+
+	for {
+		np, reduced := pair.ReduceOnce()
+		// fmt.Printf("%s -> %s, %v\n", pair, np, reduced)
+		if !reduced {
+			break
+		}
+		pair = &np
+	}
+
+	fmt.Printf("Final pair: %s\n", pair)
+	fmt.Printf("Magnitude: %d\n", pair.Magnitude())
 }
