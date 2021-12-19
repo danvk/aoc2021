@@ -28,6 +28,9 @@ func (p Point) Rot90Y() Point {
 func (p Point) Rot90X() Point {
 	return Point{p.x, -p.z, p.y}
 }
+func (p Point) String() string {
+	return fmt.Sprintf("(%d,%d,%d)", p.x, p.y, p.z)
+}
 
 type Mat [][]int
 
@@ -68,10 +71,10 @@ func (m Mat) Clone() Mat {
 	return ID.Mult(m)
 }
 func (m Mat) String() string {
-	return fmt.Sprintf("%d,%d,%d;%d,%d,%d;%d,%d,%d",
-		m[0][1], m[0][1], m[0][2],
-		m[1][1], m[1][1], m[1][2],
-		m[2][1], m[2][1], m[2][2],
+	return fmt.Sprintf("%d,%d,%d; %d,%d,%d; %d,%d,%d",
+		m[0][0], m[0][1], m[0][2],
+		m[1][0], m[1][1], m[1][2],
+		m[2][0], m[2][1], m[2][2],
 	)
 }
 
@@ -161,6 +164,24 @@ func FindBestOverlap(as, bs []Point) (Point, int) {
 	return bestShift, bestOverlap
 }
 
+func FindBestRotatedOverlap(as, bs []Point) (Mat, Point, int) {
+	bestOverlap := 0
+	var bestShift Point
+	bestMat := ID
+
+	for _, m := range ROTATIONS {
+		rotBs := util.Map(bs, func(p Point) Point { return p.Mult(m) })
+		shift, overlap := FindBestOverlap(as, rotBs)
+		if overlap > bestOverlap {
+			bestOverlap = overlap
+			bestShift = shift
+			bestMat = m
+		}
+	}
+
+	return bestMat, bestShift, bestOverlap
+}
+
 func main() {
 	chunks := util.ReadChunks(os.Args[1])
 
@@ -169,10 +190,8 @@ func main() {
 		var beacons []Point
 		for _, line := range chunk[1:] {
 			var x, y, z int
-			_, err := fmt.Sscanf(line, "%d,%d", &x, &y)
-			if err != nil {
-				_, err = fmt.Sscanf(line, "%d,%d,%d", &x, &y, &z)
-			}
+			// _, err := fmt.Sscanf(line, "%d,%d", &x, &y)
+			_, err := fmt.Sscanf(line, "%d,%d,%d", &x, &y, &z)
 			if err != nil {
 				panic(err)
 			}
@@ -180,4 +199,33 @@ func main() {
 		}
 		scanners = append(scanners, beacons)
 	}
+
+	for i, a := range scanners {
+		for j, b := range scanners {
+			if i >= j {
+				continue
+			}
+
+			mat, shift, overlap := FindBestRotatedOverlap(a, b)
+			fmt.Printf("%d -> %d: %d %s %s\n", i, j, overlap, shift, mat)
+			/*
+				m := Mat{
+					{-1, 0, 0},
+					{0, 0, -1},
+					{0, -1, 0},
+				}
+				rotB := util.Map(b, func(p Point) Point { return p.Mult(m) })
+
+				fmt.Printf("   b: %v\n", b)
+				fmt.Printf("rotB: %v\n", rotB)
+				shift, overlap = FindBestOverlap(a, rotB)
+				fmt.Printf("%d -> %d: %d %s %s\n", i, j, overlap, shift, m)
+				break out
+			*/
+		}
+	}
+
+	// for i, m := range ROTATIONS {
+	// 	fmt.Printf("%2d: %s\n", i, m)
+	// }
 }

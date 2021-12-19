@@ -8,6 +8,8 @@ I just guessed the right answer for part 1 without writing any code!
 
 Part 2 is >5000
 
+I'm getting 48 rotations, not 24.
+
 ### Day 18
 
 Quite a slog today -- I missed that you had to reduce after _each_ addition, rather than after all the additions. I also had a bug where I added the exploded numbers to _all_ the numbers on either side, rather than just the first.

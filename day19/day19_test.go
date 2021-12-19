@@ -5,6 +5,36 @@ import (
 	"testing"
 )
 
+func TestMultSample2(t *testing.T) {
+	tests := map[string]struct {
+		p    Point
+		want Point
+	}{
+		"0": {p: Point{-1, -1, 1}, want: Point{1, -1, 1}},
+		"1": {p: Point{-2, -2, 2}, want: Point{2, -2, 2}},
+		"2": {p: Point{-3, -3, 3}, want: Point{3, -3, 3}},
+		"3": {p: Point{-2, -3, 1}, want: Point{2, -1, 3}},
+		"4": {p: Point{5, 6, -4}, want: Point{-5, 4, -6}},
+		"5": {p: Point{8, 0, 7}, want: Point{-8, -7, 0}},
+		"6": {p: Point{-5, 4, -6}, want: Point{5, 6, -4}},
+	}
+	m := Mat{
+		{-1, 0, 0},
+		{0, 0, -1},
+		{0, -1, 0},
+	}
+	// -1,0,0; 0,0,-1; 0,-1,0
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := tc.p.Mult(m)
+			if !reflect.DeepEqual(tc.want, got) {
+				t.Errorf("%v = %#v, want %#v", tc, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestFindAllOrientations(t *testing.T) {
 	rots := FindAllOrientations()
 	if len(rots) != 24 {
