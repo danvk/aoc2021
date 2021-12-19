@@ -135,11 +135,7 @@ func init() {
 // facing positive or negative x, y, or z,
 // and considering any of four directions "up" from that facing.
 
-func NumOverlapping(as, bs []Point) int {
-	aMap := make(map[Point]bool)
-	for _, a := range as {
-		aMap[a] = true
-	}
+func NumOverlapping(aMap map[Point]bool, bs []Point) int {
 	n := 0
 	for _, b := range bs {
 		if _, ok := aMap[b]; ok {
@@ -151,6 +147,11 @@ func NumOverlapping(as, bs []Point) int {
 
 // Returns shift of bs relative to as, number of overlapping beacons
 func FindBestOverlap(as, bs []Point) (Point, int) {
+	aMap := make(map[Point]bool)
+	for _, a := range as {
+		aMap[a] = true
+	}
+
 	// Consider that each pair might be the same
 	bestOverlap := 0
 	var bestShift Point
@@ -163,16 +164,31 @@ func FindBestOverlap(as, bs []Point) (Point, int) {
 			// Assume a and b are the same
 			shift := b.Sub(a)
 			newBs := util.Map(bs, func(p Point) Point { return p.Sub(shift) })
-			overlap := NumOverlapping(as, newBs)
+			overlap := NumOverlapping(aMap, newBs)
 			if overlap > bestOverlap {
 				// Ties are potentially problematic
 				// And the greedy strategy might not work.
 				bestOverlap = overlap
 				bestShift = shift
+				if bestOverlap >= 12 {
+					return bestShift, bestOverlap
+				}
 			}
 		}
 	}
 	return bestShift, bestOverlap
+}
+
+func DeDupe(points []Point) []Point {
+	m := map[string]Point{}
+	for _, p := range points {
+		s := p.String()
+		_, ok := m[s]
+		if !ok {
+			m[s] = p
+		}
+	}
+	return util.Values(m)
 }
 
 func FindBestRotatedOverlap(as, bs []Point) (Mat, Point, int) {
@@ -187,6 +203,9 @@ func FindBestRotatedOverlap(as, bs []Point) (Mat, Point, int) {
 			bestOverlap = overlap
 			bestShift = shift
 			bestMat = m
+			if bestOverlap >= 12 {
+				break
+			}
 		}
 	}
 
@@ -210,27 +229,24 @@ func main() {
 		scanners = append(scanners, beacons)
 	}
 
-	aligned := [][]Point{scanners[0]}
+	aligned := scanners[0]
 	remaining := scanners[1:]
 
 	shifts := []Point{{0, 0, 0}}
 
 	for len(remaining) > 0 {
 		gotOne := false
-	outer:
-		for _, base := range aligned {
-			for i, next := range remaining {
-				mat, shift, overlap := FindBestRotatedOverlap(base, next)
-				if overlap >= 12 {
-					shifted := util.Map(next, func(p Point) Point { return p.Mult(mat).Sub(shift) })
-					// XXX more efficient to de-dupe here
-					aligned = append(aligned, shifted)
-					remaining = append(remaining[:i], remaining[i+1:]...)
-					fmt.Printf("Got one! %d/%d\n", len(aligned), len(remaining))
-					shifts = append(shifts, shift)
-					gotOne = true
-					break outer
-				}
+		for i, next := range remaining {
+			mat, shift, overlap := FindBestRotatedOverlap(aligned, next)
+			if overlap >= 12 {
+				shifted := util.Map(next, func(p Point) Point { return p.Mult(mat).Sub(shift) })
+				// XXX more efficient to de-dupe here
+				aligned = DeDupe(append(aligned, shifted...))
+				remaining = append(remaining[:i], remaining[i+1:]...)
+				fmt.Printf("Got one! %d/%d\n", len(aligned), len(remaining))
+				shifts = append(shifts, shift)
+				gotOne = true
+				break
 			}
 		}
 
@@ -240,10 +256,10 @@ func main() {
 	}
 
 	allPoints := map[string]Point{}
-	for _, a := range aligned {
-		for _, point := range a {
-			allPoints[point.String()] = point
-		}
+	for _, point := range aligned {
+		// for _, point := range a {
+		allPoints[point.String()] = point
+		// }
 	}
 
 	fmt.Printf("Total beacons: %d\n", len(allPoints))
