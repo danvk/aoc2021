@@ -4,11 +4,14 @@
 
 ### Day 19
 
-I just guessed the right answer for part 1 without writing any code!
-
-Part 2 is >5000, >10000
+I just guessed the right answer for part 1 without writing any code! Two hours later I had it for real. My idea on how to solve this was correct (try all rotations, find the best shift), it was just tricky to implement without bugs.
 
 I'm getting 48 rotations, not 24.
+*It's because I was including flips, whereas the problem just wants rotations. See: [reddit comment][48]*
+
+My initial version took ~3 minutes to run. After some light optimizations, it's down to 8 seconds.
+
+[48]: https://www.reddit.com/r/adventofcode/comments/rjpf7f/2021_day_19_solutions/
 
 ### Day 18
 
