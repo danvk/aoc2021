@@ -2,6 +2,12 @@
 
 ## Advent of Code
 
+### Day 19
+
+I just guessed the right answer for part 1 without writing any code!
+
+Part 2 is >5000
+
 ### Day 18
 
 Quite a slog today -- I missed that you had to reduce after _each_ addition, rather than after all the additions. I also had a bug where I added the exploded numbers to _all_ the numbers on either side, rather than just the first.
@@ -33,7 +39,7 @@ becomes this:
 
 Neat! <https://stackoverflow.com/a/38897667/388951>
 
-Why do my `Init()` functions never get called?
+Why do my `Init()` functions never get called? (@derat points out that it should be `init`. Whoops!)
 
 ### Day 15
 
