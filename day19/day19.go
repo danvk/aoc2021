@@ -107,15 +107,17 @@ func FindAllOrientations() []Mat {
 							for n := 0; n < nz; n++ {
 								m = m.Mult(ROTS[2])
 							}
-							if fx > 0 {
-								m = m.Mult(FLIPS[0])
-							}
-							if fy > 0 {
-								m = m.Mult(FLIPS[1])
-							}
-							if fz > 0 {
-								m = m.Mult(FLIPS[2])
-							}
+							/*
+								if fx > 0 {
+									m = m.Mult(FLIPS[0])
+								}
+								if fy > 0 {
+									m = m.Mult(FLIPS[1])
+								}
+								if fz > 0 {
+									m = m.Mult(FLIPS[2])
+								}
+							*/
 							orients[m.String()] = m
 						}
 					}
