@@ -6,7 +6,7 @@
 
 I just guessed the right answer for part 1 without writing any code!
 
-Part 2 is >5000
+Part 2 is >5000, >10000
 
 I'm getting 48 rotations, not 24.
 

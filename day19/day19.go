@@ -190,7 +190,6 @@ func main() {
 		var beacons []Point
 		for _, line := range chunk[1:] {
 			var x, y, z int
-			// _, err := fmt.Sscanf(line, "%d,%d", &x, &y)
 			_, err := fmt.Sscanf(line, "%d,%d,%d", &x, &y, &z)
 			if err != nil {
 				panic(err)
@@ -200,32 +199,58 @@ func main() {
 		scanners = append(scanners, beacons)
 	}
 
-	for i, a := range scanners {
-		for j, b := range scanners {
-			if i >= j {
-				continue
-			}
+	aligned := [][]Point{scanners[0]}
+	remaining := scanners[1:]
 
-			mat, shift, overlap := FindBestRotatedOverlap(a, b)
-			fmt.Printf("%d -> %d: %d %s %s\n", i, j, overlap, shift, mat)
-			/*
-				m := Mat{
-					{-1, 0, 0},
-					{0, 0, -1},
-					{0, -1, 0},
+	shifts := []Point{{0, 0, 0}}
+
+	for len(remaining) > 0 {
+		gotOne := false
+	outer:
+		for _, base := range aligned {
+			for i, next := range remaining {
+				mat, shift, overlap := FindBestRotatedOverlap(base, next)
+				if overlap >= 12 {
+					shifted := util.Map(next, func(p Point) Point { return p.Mult(mat).Sub(shift) })
+					// XXX more efficient to de-dupe here
+					aligned = append(aligned, shifted)
+					remaining = append(remaining[:i], remaining[i+1:]...)
+					fmt.Printf("Got one! %d/%d\n", len(aligned), len(remaining))
+					shifts = append(shifts, shift)
+					gotOne = true
+					break outer
 				}
-				rotB := util.Map(b, func(p Point) Point { return p.Mult(m) })
+			}
+		}
 
-				fmt.Printf("   b: %v\n", b)
-				fmt.Printf("rotB: %v\n", rotB)
-				shift, overlap = FindBestOverlap(a, rotB)
-				fmt.Printf("%d -> %d: %d %s %s\n", i, j, overlap, shift, m)
-				break out
-			*/
+		if !gotOne {
+			panic("Unable to align!")
 		}
 	}
 
-	// for i, m := range ROTATIONS {
-	// 	fmt.Printf("%2d: %s\n", i, m)
-	// }
+	allPoints := map[string]Point{}
+	for _, a := range aligned {
+		for _, point := range a {
+			allPoints[point.String()] = point
+		}
+	}
+
+	fmt.Printf("Total beacons: %d\n", len(allPoints))
+
+	/*
+		for i, a := range scanners {
+			for j, b := range scanners {
+				if i >= j {
+					continue
+				}
+
+				mat, shift, overlap := FindBestRotatedOverlap(a, b)
+				if overlap >= 12 {
+					fmt.Printf("%d -> %d: %d %s %s\n", i, j, overlap, shift, mat)
+					nextBs := util.Map(b, func(p Point) Point { return p.Mult(mat).Sub(shift) })
+					fmt.Printf("  %d\n", NumOverlapping(a, nextBs))
+				}
+			}
+		}
+	*/
 }
