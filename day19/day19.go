@@ -32,6 +32,17 @@ func (p Point) String() string {
 	return fmt.Sprintf("(%d,%d,%d)", p.x, p.y, p.z)
 }
 
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+func (a Point) Manhattan(b Point) int {
+	return abs(a.x-b.x) + abs(a.y-b.y) + abs(a.z-b.z)
+}
+
 type Mat [][]int
 
 func (p Point) Mult(m Mat) Point {
@@ -236,6 +247,20 @@ func main() {
 	}
 
 	fmt.Printf("Total beacons: %d\n", len(allPoints))
+
+	longest := 0
+	for i, a := range shifts {
+		for j, b := range shifts {
+			if j >= i {
+				break
+			}
+			d := a.Manhattan(b)
+			if d > longest {
+				longest = d
+			}
+		}
+	}
+	fmt.Printf("Longest distance: %d\n", longest)
 
 	/*
 		for i, a := range scanners {
