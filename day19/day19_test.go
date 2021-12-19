@@ -5,6 +5,54 @@ import (
 	"testing"
 )
 
+func TestFindAllOrientations(t *testing.T) {
+	rots := FindAllOrientations()
+	if len(rots) != 24 {
+		t.Errorf("Got %d rotations, want %d", len(rots), 24)
+	}
+}
+
+func TestMult(t *testing.T) {
+	x := Point{5, 0, 0}
+	want := Point{0, 5, 0}
+	got := x.Mult(ROTS[0])
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("%#v.Mult(ROTS[0]) = %#v want %#v", x, got, want)
+	}
+
+	want = Point{-5, 0, 0}
+	got = x.Mult(ROTS[0]).Mult(ROTS[0])
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("%#v.Mult(ROTS[0]).Mult(ROTS[0]) = %#v want %#v", x, got, want)
+	}
+
+	m := ROTS[0].Mult(ROTS[0])
+	got = x.Mult(m)
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("%#v.Mult(ROTS[0]).Mult(ROTS[0]) = %#v want %#v", x, got, want)
+	}
+}
+
+func TestRot90Z(t *testing.T) {
+	tests := map[string]struct {
+		p    Point
+		want Point
+	}{
+		"x": {p: Point{1, 0, 0}, want: Point{0, 1, 0}},
+		"y": {p: Point{0, 1, 0}, want: Point{-1, 0, 0}},
+		"z": {p: Point{-1, 0, 10}, want: Point{0, -1, 10}},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := tc.p.Rot90Z()
+			if !reflect.DeepEqual(tc.want, got) {
+				t.Errorf("%v = %#v, want %#v", tc, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestFindBestOverlap(t *testing.T) {
 	tests := map[string]struct {
 		a     []Point
