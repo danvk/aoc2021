@@ -17,6 +17,8 @@ I'm getting 48 rotations, not 24.
 
 My initial version took ~3 minutes to run. After some light optimizations, it's down to 8 seconds.
 
+Ryan said he just looked up the list of 24 rotation matrices. In retrospect I'm not sure why that felt like cheating to me, but guessing an answer didn't.
+
 [48]: https://www.reddit.com/r/adventofcode/comments/rjpf7f/2021_day_19_solutions/
 
 ### Day 18

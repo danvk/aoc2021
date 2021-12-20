@@ -29,7 +29,6 @@ func PrintCell(cell int) string {
 func Advance(grid map[c.Coord]int, bg int, decoder []int) (map[c.Coord]int, int) {
 	min := c.MinXY(grid)
 	max := c.MaxXY(grid)
-	fmt.Printf("min: %s, max: %s\n", min, max)
 
 	next := map[c.Coord]int{}
 	for x := min.X - 1; x <= max.X+1; x++ {
@@ -47,7 +46,6 @@ func Advance(grid map[c.Coord]int, bg int, decoder []int) (map[c.Coord]int, int)
 					}
 				}
 			}
-			// fmt.Printf("%d,%d -> %d\n", x, y, idx)
 			v := decoder[idx]
 			next[c.Coord{X: x, Y: y}] = v
 		}
@@ -87,12 +85,6 @@ func main() {
 		grid, bg = Advance(grid, bg, decoder)
 	}
 
-	// c.PrintGrid(grid, ".", PrintCell)
-	// fmt.Printf("Background: %d\n", bg)
-	// grid, bg = Advance(grid, bg, decoder)
-	// c.PrintGrid(grid, ".", PrintCell)
-	// fmt.Printf("Background: %d\n", bg)
-
 	if bg != 0 {
 		panic(bg)
 	}
@@ -104,8 +96,3 @@ func main() {
 	}
 	fmt.Printf("Num Set: %d\n", num)
 }
-
-// 10,000 = too high
-//  5,991 = too high
-//  5,469 = too high
-//  5,372 = wrong
