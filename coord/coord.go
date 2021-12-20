@@ -9,10 +9,15 @@ type Coord struct {
 	X, Y int
 }
 
+func (c Coord) String() string {
+	return fmt.Sprintf("(%d,%d)", c.X, c.Y)
+}
+
 func New(X, Y int) Coord {
 	return Coord{X, Y}
 }
 
+// TODO: delete these
 func CoordX(c Coord) int {
 	return c.X
 }
@@ -52,12 +57,21 @@ func MaxXY[V any](m map[Coord]V) Coord {
 	return Coord{maxX, maxY}
 }
 
+func MinXY[V any](m map[Coord]V) Coord {
+	maxX := util.Min(util.Map(util.Keys(m), CoordX))
+	maxY := util.Min(util.Map(util.Keys(m), CoordY))
+
+	return Coord{maxX, maxY}
+}
+
 func PrintGrid[V any](m map[Coord]V, blank string, printer func(v V) string) {
-	c := MaxXY(m)
+	c := MinXY(m)
+	minX, minY := c.X, c.Y
+	c = MaxXY(m)
 	maxX, maxY := c.X, c.Y
 
-	for y := 0; y <= maxY; y++ {
-		for x := 0; x <= maxX; x++ {
+	for y := minY; y <= maxY; y++ {
+		for x := minX; x <= maxX; x++ {
 			v, ok := m[Coord{x, y}]
 			if ok {
 				fmt.Print(printer(v))

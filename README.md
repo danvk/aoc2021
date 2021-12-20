@@ -2,6 +2,10 @@
 
 ## Advent of Code
 
+### Day 20
+
+This one doesn't make sense to me -- because the first bit in my decoder string is `#`, doesn't that mean that the entire infinite grid should light up immediately?
+
 ### Day 19
 
 I just guessed the right answer for part 1 without writing any code! Two hours later I had it for real. My idea on how to solve this was correct (try all rotations, find the best shift), it was just tricky to implement without bugs.
