@@ -83,13 +83,15 @@ func main() {
 	}
 	bg := 0
 
-	c.PrintGrid(grid, ".", PrintCell)
-	grid, bg = Advance(grid, bg, decoder)
-	c.PrintGrid(grid, ".", PrintCell)
-	fmt.Printf("Background: %d\n", bg)
-	grid, bg = Advance(grid, bg, decoder)
-	c.PrintGrid(grid, ".", PrintCell)
-	fmt.Printf("Background: %d\n", bg)
+	for step := 1; step <= 50; step++ {
+		grid, bg = Advance(grid, bg, decoder)
+	}
+
+	// c.PrintGrid(grid, ".", PrintCell)
+	// fmt.Printf("Background: %d\n", bg)
+	// grid, bg = Advance(grid, bg, decoder)
+	// c.PrintGrid(grid, ".", PrintCell)
+	// fmt.Printf("Background: %d\n", bg)
 
 	if bg != 0 {
 		panic(bg)
