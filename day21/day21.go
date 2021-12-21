@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Die struct {
 	val int
@@ -18,6 +21,7 @@ func (d *Die) Roll() int {
 }
 
 func Part1(p1, p2 int) {
+	defer elapsed("Part 1")()
 	die := Die{val: 1}
 	p1score, p2score := 0, 0
 	for {
@@ -69,6 +73,7 @@ func Advance(pos int, roll int) int {
 }
 
 func Part2(p1, p2 int) {
+	defer elapsed("Part 2")()
 	states := map[State]int64{{p1, p2, 0, 0}: 1}
 
 	rolls := map[int]int64{}
@@ -86,7 +91,7 @@ func Part2(p1, p2 int) {
 	for step := 1; step <= 100000; step++ {
 		for turn := 1; turn <= 2; turn++ {
 			nextStates := map[State]int64{}
-			fmt.Printf("step %d turn %d size: %d\n", step, turn, len(states))
+			// fmt.Printf("step %d turn %d size: %d\n", step, turn, len(states))
 			for state, count := range states {
 				for roll, rCount := range rolls {
 					p1, p2 := state.p1, state.p2
@@ -122,6 +127,13 @@ func Part2(p1, p2 int) {
 }
 
 const mode = "input"
+
+func elapsed(what string) func() {
+	start := time.Now()
+	return func() {
+		fmt.Printf("%s took %v\n", what, time.Since(start))
+	}
+}
 
 func main() {
 	var p1, p2 int
