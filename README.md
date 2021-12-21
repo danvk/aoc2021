@@ -2,6 +2,10 @@
 
 ## Advent of Code
 
+### Day 21
+
+Two very different implementations for part 1 and part 2 today, but neither was very difficult. The state size for part 2 never got larger than ~12,000.
+
 ### Day 20
 
 This one doesn't make sense to me -- because the first bit in my decoder string is `#`, doesn't that mean that the entire infinite grid should light up immediately?

@@ -133,6 +133,6 @@ func main() {
 		p2 = 6
 	}
 
-	// Part1(p1, p2)
+	Part1(p1, p2)
 	Part2(p1, p2)
 }
