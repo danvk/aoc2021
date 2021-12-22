@@ -153,7 +153,7 @@ func GetDistinctSorted(ivs []Interval) []int {
 // Returns a map from value --> index and a list of lengths
 func MakeDistinctIntervals(ivs []Interval) (map[int]int, []int) {
 	xs := GetDistinctSorted(ivs)
-	fmt.Printf(" %#v\n", xs)
+	// fmt.Printf(" %#v\n", xs)
 
 	m := map[int]int{}
 	lens := []int{}
@@ -179,13 +179,13 @@ func MakeDistinctIntervals(ivs []Interval) (map[int]int, []int) {
 
 func IndexCuboids(lines []Cuboid) ([]Cuboid, []int, []int, []int) {
 	xM, xL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.x }))
-	fmt.Printf("xs: (%v) %v\n\n", xM, xL)
+	// fmt.Printf("xs: (%v) %v\n\n", xM, xL)
 
 	yM, yL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.y }))
-	fmt.Printf("ys: (%v) %v\n\n", yM, yL)
+	// fmt.Printf("ys: (%v) %v\n\n", yM, yL)
 
 	zM, zL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.z }))
-	fmt.Printf("ys: (%v) %v\n\n", zM, zL)
+	// fmt.Printf("ys: (%v) %v\n\n", zM, zL)
 
 	fmt.Printf("Distinct xs: %d, ys: %d, zs: %d\n", len(xL), len(yL), len(zL))
 
@@ -202,11 +202,13 @@ func IndexCuboids(lines []Cuboid) ([]Cuboid, []int, []int, []int) {
 func main() {
 	linesText := util.ReadLines(os.Args[1])
 	lines := util.Map(linesText, ParseLine)
-	fmt.Printf("cuboids: %v\n", lines)
+	// fmt.Printf("cuboids: %v\n", lines)
 
 	cubes, xL, yL, zL := IndexCuboids(lines)
-	fmt.Printf("cubes: %v\n", cubes)
+	// fmt.Printf("cubes: %v\n", cubes)
 	// fmt.Printf("Cubes: %#v\n", cubes)
+	nx, ny, nz := len(xL), len(yL), len(zL)
+
 	start := time.Now()
 	// grid := map[Coord]bool{}
 	if len(xL) > 1000 {
@@ -218,22 +220,33 @@ func main() {
 	if len(zL) > 1000 {
 		panic(len(zL))
 	}
-	var grid [1000][1000][1000]bool
-	for i, c := range cubes {
-		Set(c, &grid)
-		fmt.Printf("%3d elapsed: %v\n", i, time.Since(start))
+	grid := make([]bool, nx*ny*nz)
+	for _, c := range cubes {
+		for x := c.x.min; x < c.x.max; x++ {
+			for y := c.y.min; y < c.y.max; y++ {
+				for z := c.z.min; z < c.z.max; z++ {
+					grid[(x*ny+y)*nz+z] = c.isOn
+				}
+			}
+		}
 	}
 
+	fmt.Printf("On/Off operations %v\n", time.Since(start))
+
+	start = time.Now()
 	var num int64 = 0
 	for x := 0; x < len(xL); x++ {
+		bx := x * ny
 		for y := 0; y < len(yL); y++ {
+			by := (bx + y) * nz
 			for z := 0; z < len(zL); z++ {
-				if grid[x][y][z] {
+				if grid[by+z] {
 					num += int64(xL[x]) * int64(yL[y]) * int64(zL[z])
 				}
 			}
 		}
 	}
 
+	fmt.Printf("Counting %v\n", time.Since(start))
 	fmt.Printf("Num cells on: %d\n", num)
 }
