@@ -4,6 +4,7 @@ import (
 	"aoc/util"
 	"fmt"
 	"os"
+	"time"
 )
 
 type Coord struct {
@@ -12,6 +13,10 @@ type Coord struct {
 
 type Cuboid struct {
 	x, y, z Interval
+}
+
+type Rect struct {
+	x, y Interval
 }
 
 func min(x int, y int) int {
@@ -93,12 +98,82 @@ func (a Interval) Overlaps(b Interval) []Interval {
 	return ranges
 }
 
+func (a Rect) Intersects(b Rect) bool {
+	return a.x.Intersects(b.x) && a.y.Intersects(b.y)
+}
+
+func (a Rect) Intersection(b Rect) Rect {
+	return Rect{
+		x: a.x.Intersect(b.x),
+		y: a.y.Intersect(b.y),
+	}
+}
+
+func (a Rect) Area() int {
+	return a.x.Length() * a.y.Length()
+}
+
+func (r Rect) Union(other Rect) []Rect {
+	var result []Rect
+	for _, x := range r.x.Overlaps(other.x) {
+		for _, y := range r.y.Overlaps(other.y) {
+			part := Rect{x, y}
+			if part.Intersects(r) || part.Intersects(other) {
+				result = append(result, r)
+			}
+		}
+	}
+	return result
+}
+
+func (r Rect) Subtract(other Rect) []Rect {
+	if !r.Intersects(other) {
+		return []Rect{r}
+	}
+
+	var result []Rect
+	for _, x := range r.x.Overlaps(other.x) {
+		for _, y := range r.y.Overlaps(other.y) {
+			part := Rect{x, y}
+			if part.Area() > 0 && part.Intersects(r) && !part.Intersects(other) {
+				result = append(result, r)
+			}
+		}
+	}
+
+	return result
+}
+
+func SubtractRects(rects []Rect, sub Rect) []Rect {
+	var result []Rect
+
+	for _, rect := range rects {
+		if !rect.Intersects(sub) {
+			result = append(result, rect)
+		} else {
+			result = append(result, rect.Subtract(sub)...)
+		}
+	}
+	return result
+}
+
+func AddRects(rects []Rect, add Rect) []Rect {
+	remains := SubtractRects(rects, add)
+	remains = append(remains, add)
+	return remains
+}
+
 func (c Cuboid) Clip() Cuboid {
 	return Cuboid{
 		x: c.x.Intersect(Interval{-50, 50}),
 		y: c.y.Intersect(Interval{-50, 50}),
 		z: c.z.Intersect(Interval{-50, 50}),
 	}
+}
+
+func (c Cuboid) InClipArea() bool {
+	iv := Interval{-50, 50}
+	return c.x.Intersects(iv) && c.y.Intersects(iv) && c.z.Intersects(iv)
 }
 
 func (c Cuboid) Intersects(other Cuboid) bool {
@@ -175,7 +250,7 @@ func Set(c Cuboid, grid map[Coord]bool) {
 	}
 }
 
-func ParseLine(line string) (bool, Cuboid) {
+func ParseLine(line string) Line {
 	var c Cuboid
 	var onOff string
 	_, err := fmt.Sscanf(line, "%s x=%d..%d,y=%d..%d,z=%d..%d",
@@ -184,28 +259,76 @@ func ParseLine(line string) (bool, Cuboid) {
 	if err != nil {
 		panic(err)
 	}
-	return onOff == "on", c
+	return Line{
+		c:    c,
+		isOn: onOff == "on",
+	}
+}
+
+type Line struct {
+	c    Cuboid
+	isOn bool
+}
+
+func (a Interval) ExtentWith(b Interval) Interval {
+	return Interval{
+		min: min(a.min, b.min),
+		max: max(a.max, b.max),
+	}
 }
 
 func main() {
 	linesText := util.ReadLines(os.Args[1])
-	var disjointCuboids []Cuboid
+	lines := util.Map(linesText, ParseLine)
 
-	for i, line := range linesText {
-		isOn, cuboid := ParseLine(line)
-		if isOn {
-			disjointCuboids = AddCuboid(disjointCuboids, cuboid)
-		} else {
-			disjointCuboids = SubtractCuboid(disjointCuboids, cuboid)
+	extent := Cuboid{}
+	for _, line := range lines {
+		if line.isOn {
+			cuboid := line.c
+			extent.x = extent.x.ExtentWith(cuboid.x)
+			extent.y = extent.y.ExtentWith(cuboid.y)
+			extent.z = extent.z.ExtentWith(cuboid.z)
 		}
-		disjointCuboids = util.Filter(disjointCuboids, func(c Cuboid) bool { return c.Volume() > 0 })
-
-		fmt.Printf("%d %s -> %d disjoint cuboids\n", i, line, len(disjointCuboids))
 	}
 
+	var disjointRects []Rect
+
+	start := time.Now()
+
+	// bigOnes := util.Filter(lines, func(line Line) bool { return !line.c.InClipArea() })
+
 	num := 0
-	for _, cuboid := range disjointCuboids {
-		num += cuboid.Volume()
+	for z := extent.z.min; z <= extent.z.max; z++ {
+		for _, line := range lines {
+			c := line.c
+			if c.z.min <= z && z <= c.z.max {
+				r := Rect{
+					x: line.c.x,
+					y: line.c.y,
+				}
+				if line.isOn {
+					disjointRects = AddRects(disjointRects, r)
+				} else {
+					disjointRects = SubtractRects(disjointRects, r)
+				}
+				disjointRects = util.Filter(disjointRects, func(r Rect) bool { return r.Area() > 0 })
+
+				// fmt.Printf("%d %s -> %d disjoint rects\n",
+				// 	i, linesText[i], len(disjointRects),
+				// )
+			}
+		}
+
+		n := 0
+		for _, rect := range disjointRects {
+			n += rect.Area()
+		}
+
+		num += n
+		nDone := z - extent.z.min + 1
+		if nDone%1000 == 0 {
+			fmt.Printf("y=%d done %d after %v, %d rects area=%d\n", z, nDone, time.Since(start), len(disjointRects), n)
+		}
 	}
 
 	fmt.Printf("Num cells on: %d\n", num)
