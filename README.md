@@ -2,6 +2,23 @@
 
 ## Advent of Code
 
+### Day 22
+
+Hardest day by far for me; My first instinct was to implement union and difference by splitting up intersecting cuboids into sub-cuboids. There could be up to 27 if you're really unlucky. It seems that some people on reddit got something like this to work, but mine completely blew up on the sample inputs.
+
+I hoped I could simplify the problem by solving independently for each (x, y) pair, so that you only have to do interval arithmetic. This would have worked and didn't take too much memory, but I clocked it at taking an estimated ~140 years. Ouch.
+
+I hoped that solving for each z value and looking at rectangles in the (x, y) plane would be a nice middle ground, but this also blew up.
+
+While driving in the afternoon, I came up with two new ideas:
+
+1. Store separate "include" and "exclude" cubes. So you can represent A + B as [A, B] - [A ∩ B]. It sounds like Iulia got something like this to work. I was concerned that operations would blow up as the number of sets in each list increased.
+2. There are only so many distinct xs, ys and zs. So if you just make a list of them and index it, you can re-use your solution from part 1 and scale each cell up by its volume.
+
+This is what I wound up doing. It was quite fast on the third sample, but was taking a long but not interminable time on my input (maybe an hour?). I replaced my `map[Coord]bool` structure with a gigantic array (`[1663][1663][1663]bool`) and it ran in ~10s.
+
+@znrk found a similar solution: <https://gist.github.com/znkr/a1c8dfcbedaabb5b97a7886f06a40282>. He made a clever choice to change the closed intervals to open intervals by adding one to the right end of each. This cuts the size of the giant grid by a factor of 8.
+
 ### Day 21
 
 Two very different implementations for part 1 and part 2 today, but neither was very difficult. The state size for part 2 never got larger than ~12,000.

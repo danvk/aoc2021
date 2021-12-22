@@ -37,7 +37,7 @@ type Interval struct {
 }
 
 func (iv Interval) String() string {
-	return fmt.Sprintf("(%d, %d)", iv.min, iv.max)
+	return fmt.Sprintf("[%d, %d)", iv.min, iv.max)
 }
 
 func (iv Interval) IsEmpty() bool {
@@ -96,14 +96,22 @@ func (a Interval) Overlaps(b Interval) []Interval {
 	return ranges
 }
 
-func Set(c Cuboid, grid *[1663][1663][1663]bool) {
-	for x := c.x.min; x <= c.x.max; x++ {
-		for y := c.y.min; y <= c.y.max; y++ {
-			for z := c.z.min; z <= c.z.max; z++ {
+func Set(c Cuboid, grid *[1000][1000][1000]bool) {
+	for x := c.x.min; x < c.x.max; x++ {
+		for y := c.y.min; y < c.y.max; y++ {
+			for z := c.z.min; z < c.z.max; z++ {
 				grid[x][y][z] = c.isOn
 			}
 		}
 	}
+}
+
+func (c Cuboid) String() string {
+	onOff := "off"
+	if c.isOn {
+		onOff = " on"
+	}
+	return fmt.Sprintf("%s x:%s y:%s z:%s", onOff, c.x, c.y, c.z)
 }
 
 func ParseLine(line string) Cuboid {
@@ -112,6 +120,10 @@ func ParseLine(line string) Cuboid {
 	_, err := fmt.Sscanf(line, "%s x=%d..%d,y=%d..%d,z=%d..%d",
 		&onOff, &c.x.min, &c.x.max, &c.y.min, &c.y.max, &c.z.min, &c.z.max,
 	)
+	// Make the intervals half-open
+	c.x.max += 1
+	c.y.max += 1
+	c.z.max += 1
 	if err != nil {
 		panic(err)
 	}
@@ -141,16 +153,24 @@ func GetDistinctSorted(ivs []Interval) []int {
 // Returns a map from value --> index and a list of lengths
 func MakeDistinctIntervals(ivs []Interval) (map[int]int, []int) {
 	xs := GetDistinctSorted(ivs)
+	fmt.Printf(" %#v\n", xs)
 
 	m := map[int]int{}
-	lens := []int{1}
+	lens := []int{}
 
 	m[xs[0]] = 0
 
-	for i := 1; i < len(xs); i++ {
-		a := xs[i-1]
-		b := xs[i]
-		lens = append(lens, b-a-1, 1) // exclusive on both ends
+	// [-10, 10] x=-10..9
+	// [-5, 15] x=-5..14
+	// -10, -5, 10, 15
+	// [-10, -5] x=-10..-6
+	// [-5, 10]  x=-5..9
+	// [10, 15]  x=10..14
+
+	for i := 0; i < len(xs)-1; i++ {
+		a := xs[i]
+		b := xs[i+1]
+		lens = append(lens, b-a)
 		m[b] = len(lens) - 1
 	}
 
@@ -159,13 +179,15 @@ func MakeDistinctIntervals(ivs []Interval) (map[int]int, []int) {
 
 func IndexCuboids(lines []Cuboid) ([]Cuboid, []int, []int, []int) {
 	xM, xL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.x }))
-	// fmt.Printf("xs: (%v) %v\n\n", xL, xM)
+	fmt.Printf("xs: (%v) %v\n\n", xM, xL)
 
 	yM, yL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.y }))
-	// fmt.Printf("ys: (%v) %v\n\n", yM, yL)
+	fmt.Printf("ys: (%v) %v\n\n", yM, yL)
 
 	zM, zL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.z }))
-	// fmt.Printf("ys: (%v) %v\n\n", zM, zL)
+	fmt.Printf("ys: (%v) %v\n\n", zM, zL)
+
+	fmt.Printf("Distinct xs: %d, ys: %d, zs: %d\n", len(xL), len(yL), len(zL))
 
 	return util.Map(lines, func(c Cuboid) Cuboid {
 		return Cuboid{
@@ -180,21 +202,23 @@ func IndexCuboids(lines []Cuboid) ([]Cuboid, []int, []int, []int) {
 func main() {
 	linesText := util.ReadLines(os.Args[1])
 	lines := util.Map(linesText, ParseLine)
+	fmt.Printf("cuboids: %v\n", lines)
 
 	cubes, xL, yL, zL := IndexCuboids(lines)
+	fmt.Printf("cubes: %v\n", cubes)
 	// fmt.Printf("Cubes: %#v\n", cubes)
 	start := time.Now()
 	// grid := map[Coord]bool{}
-	if len(xL) > 1663 {
+	if len(xL) > 1000 {
 		panic(len(xL))
 	}
-	if len(yL) > 1663 {
+	if len(yL) > 1000 {
 		panic(len(yL))
 	}
-	if len(zL) > 1663 {
+	if len(zL) > 1000 {
 		panic(len(zL))
 	}
-	var grid [1663][1663][1663]bool
+	var grid [1000][1000][1000]bool
 	for i, c := range cubes {
 		Set(c, &grid)
 		fmt.Printf("%3d elapsed: %v\n", i, time.Since(start))
