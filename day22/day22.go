@@ -11,9 +11,8 @@ type Coord struct {
 }
 
 type Cuboid struct {
-	min  Coord
-	max  Coord
-	isOn bool
+	x, y, z Interval
+	isOn    bool
 }
 
 func min(x int, y int) int {
@@ -30,30 +29,57 @@ func max(x int, y int) int {
 	return y
 }
 
+// Closed interval
+type Interval struct {
+	min, max int
+}
+
+func (iv Interval) String() string {
+	return fmt.Sprintf("(%d, %d)", iv.min, iv.max)
+}
+
+func (iv Interval) IsEmpty() bool {
+	return iv.max > iv.min
+}
+
+func (a Interval) Intersect(b Interval) Interval {
+	return Interval{
+		min: max(a.min, b.min),
+		max: min(a.max, b.max),
+	}
+}
+
+func (a Interval) Intersects(b Interval) bool {
+	return a.min <= b.max && b.min <= a.max
+}
+
+func (a Interval) Union(b Interval) []Interval {
+	if a.Intersects(b) {
+		return []Interval{{
+			min: min(a.min, b.min),
+			max: max(a.max, b.max),
+		}}
+	}
+	return []Interval{a, b}
+}
+
 // func IntersectRange(aMin, aMax, bMin, bMax int) int, int {
 //
 // }
 
 func (c Cuboid) Clip() Cuboid {
 	return Cuboid{
-		min: Coord{
-			x: max(-50, c.min.x),
-			y: max(-50, c.min.y),
-			z: max(-50, c.min.z),
-		},
-		max: Coord{
-			x: min(50, c.max.x),
-			y: min(50, c.max.y),
-			z: min(50, c.max.z),
-		},
+		x:    c.x.Intersect(Interval{-50, 50}),
+		y:    c.y.Intersect(Interval{-50, 50}),
+		z:    c.z.Intersect(Interval{-50, 50}),
 		isOn: c.isOn,
 	}
 }
 
 func Set(c Cuboid, grid map[Coord]bool) {
-	for x := c.min.x; x <= c.max.x; x++ {
-		for y := c.min.y; y <= c.max.y; y++ {
-			for z := c.min.z; z <= c.max.z; z++ {
+	for x := c.x.min; x <= c.x.max; x++ {
+		for y := c.y.min; y <= c.y.max; y++ {
+			for z := c.z.min; z <= c.z.max; z++ {
 				grid[Coord{x, y, z}] = c.isOn
 			}
 		}
@@ -63,7 +89,9 @@ func Set(c Cuboid, grid map[Coord]bool) {
 func ParseLine(line string) Cuboid {
 	var c Cuboid
 	var onOff string
-	_, err := fmt.Sscanf(line, "%s x=%d..%d,y=%d..%d,z=%d..%d", &onOff, &c.min.x, &c.max.x, &c.min.y, &c.max.y, &c.min.z, &c.max.z)
+	_, err := fmt.Sscanf(line, "%s x=%d..%d,y=%d..%d,z=%d..%d",
+		&onOff, &c.x.min, &c.x.max, &c.y.min, &c.y.max, &c.z.min, &c.z.max,
+	)
 	if err != nil {
 		panic(err)
 	}

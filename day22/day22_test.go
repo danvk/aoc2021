@@ -9,22 +9,67 @@ func add(a, b int) int {
 	return a + b
 }
 
-func TestClip(t *testing.T) {
+func TestIntersect(t *testing.T) {
 	tests := map[string]struct {
-		a    string
-		want Cuboid
+		a    Interval
+		b    Interval
+		want Interval
 	}{
-		"outside": {
-			a:    "on x=-54112..-39298,y=-85059..-49293,z=-27449..7877",
-			want: Cuboid{},
+		"overlap": {
+			a:    Interval{10, 100},
+			b:    Interval{50, 120},
+			want: Interval{50, 100},
+		},
+		"empty": {
+			a:    Interval{10, 100},
+			b:    Interval{-100, 0},
+			want: Interval{10, 0},
+		},
+		"touching": {
+			a:    Interval{10, 100},
+			b:    Interval{100, 110},
+			want: Interval{100, 100},
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := add(tc.a, tc.b)
+			got := tc.a.Intersect(tc.b)
 			if !reflect.DeepEqual(tc.want, got) {
-				t.Errorf("%v = %#v, want %#v", tc, got, tc.want)
+				t.Errorf("%v.Intersect(%v) = %v, want %v", tc.a, tc.b, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestIntersects(t *testing.T) {
+	tests := map[string]struct {
+		a    Interval
+		b    Interval
+		want bool
+	}{
+		"overlap": {
+			a:    Interval{10, 100},
+			b:    Interval{50, 120},
+			want: true,
+		},
+		"empty": {
+			a:    Interval{10, 100},
+			b:    Interval{-100, 0},
+			want: false,
+		},
+		"touching": {
+			a:    Interval{10, 100},
+			b:    Interval{100, 110},
+			want: true,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := tc.a.Intersects(tc.b)
+			if !reflect.DeepEqual(tc.want, got) {
+				t.Errorf("%v.Intersect(%v) = %v, want %v", tc.a, tc.b, got, tc.want)
 			}
 		})
 	}
