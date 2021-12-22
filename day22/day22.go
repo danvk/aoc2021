@@ -96,11 +96,11 @@ func (a Interval) Overlaps(b Interval) []Interval {
 	return ranges
 }
 
-func Set(c Cuboid, grid map[Coord]bool) {
+func Set(c Cuboid, grid *[1663][1663][1663]bool) {
 	for x := c.x.min; x <= c.x.max; x++ {
 		for y := c.y.min; y <= c.y.max; y++ {
 			for z := c.z.min; z <= c.z.max; z++ {
-				grid[Coord{x, y, z}] = c.isOn
+				grid[x][y][z] = c.isOn
 			}
 		}
 	}
@@ -184,16 +184,30 @@ func main() {
 	cubes, xL, yL, zL := IndexCuboids(lines)
 	// fmt.Printf("Cubes: %#v\n", cubes)
 	start := time.Now()
-	grid := map[Coord]bool{}
+	// grid := map[Coord]bool{}
+	if len(xL) > 1663 {
+		panic(len(xL))
+	}
+	if len(yL) > 1663 {
+		panic(len(yL))
+	}
+	if len(zL) > 1663 {
+		panic(len(zL))
+	}
+	var grid [1663][1663][1663]bool
 	for i, c := range cubes {
-		Set(c, grid)
+		Set(c, &grid)
 		fmt.Printf("%3d elapsed: %v\n", i, time.Since(start))
 	}
 
 	var num int64 = 0
-	for c, v := range grid {
-		if v {
-			num += int64(xL[c.x]) * int64(yL[c.y]) * int64(zL[c.z])
+	for x := 0; x < len(xL); x++ {
+		for y := 0; y < len(yL); y++ {
+			for z := 0; z < len(zL); z++ {
+				if grid[x][y][z] {
+					num += int64(xL[x]) * int64(yL[y]) * int64(zL[z])
+				}
+			}
 		}
 	}
 
