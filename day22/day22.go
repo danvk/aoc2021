@@ -4,6 +4,7 @@ import (
 	"aoc/util"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -13,10 +14,7 @@ type Coord struct {
 
 type Cuboid struct {
 	x, y, z Interval
-}
-
-type Rect struct {
-	x, y Interval
+	isOn    bool
 }
 
 func min(x int, y int) int {
@@ -98,159 +96,17 @@ func (a Interval) Overlaps(b Interval) []Interval {
 	return ranges
 }
 
-func (a Rect) Intersects(b Rect) bool {
-	return a.x.Intersects(b.x) && a.y.Intersects(b.y)
-}
-
-func (a Rect) Intersection(b Rect) Rect {
-	return Rect{
-		x: a.x.Intersect(b.x),
-		y: a.y.Intersect(b.y),
-	}
-}
-
-func (a Rect) Area() int {
-	return a.x.Length() * a.y.Length()
-}
-
-func (r Rect) Union(other Rect) []Rect {
-	var result []Rect
-	for _, x := range r.x.Overlaps(other.x) {
-		for _, y := range r.y.Overlaps(other.y) {
-			part := Rect{x, y}
-			if part.Intersects(r) || part.Intersects(other) {
-				result = append(result, r)
-			}
-		}
-	}
-	return result
-}
-
-func (r Rect) Subtract(other Rect) []Rect {
-	if !r.Intersects(other) {
-		return []Rect{r}
-	}
-
-	var result []Rect
-	for _, x := range r.x.Overlaps(other.x) {
-		for _, y := range r.y.Overlaps(other.y) {
-			part := Rect{x, y}
-			if part.Area() > 0 && part.Intersects(r) && !part.Intersects(other) {
-				result = append(result, r)
-			}
-		}
-	}
-
-	return result
-}
-
-func SubtractRects(rects []Rect, sub Rect) []Rect {
-	var result []Rect
-
-	for _, rect := range rects {
-		if !rect.Intersects(sub) {
-			result = append(result, rect)
-		} else {
-			result = append(result, rect.Subtract(sub)...)
-		}
-	}
-	return result
-}
-
-func AddRects(rects []Rect, add Rect) []Rect {
-	remains := SubtractRects(rects, add)
-	remains = append(remains, add)
-	return remains
-}
-
-func (c Cuboid) Clip() Cuboid {
-	return Cuboid{
-		x: c.x.Intersect(Interval{-50, 50}),
-		y: c.y.Intersect(Interval{-50, 50}),
-		z: c.z.Intersect(Interval{-50, 50}),
-	}
-}
-
-func (c Cuboid) InClipArea() bool {
-	iv := Interval{-50, 50}
-	return c.x.Intersects(iv) && c.y.Intersects(iv) && c.z.Intersects(iv)
-}
-
-func (c Cuboid) Intersects(other Cuboid) bool {
-	return c.x.Intersects(other.x) && c.y.Intersects(other.y) && c.z.Intersects(other.z)
-}
-
-func (c Cuboid) Volume() int {
-	return c.x.Length() * c.y.Length() * c.z.Length()
-}
-
-func (c Cuboid) Union(other Cuboid) []Cuboid {
-	var result []Cuboid
-	for _, x := range c.x.Overlaps(other.x) {
-		for _, y := range c.y.Overlaps(other.y) {
-			for _, z := range c.z.Overlaps(other.z) {
-				part := Cuboid{x, y, z}
-				if part.Intersects(c) || part.Intersects(other) {
-					result = append(result, c)
-				}
-			}
-		}
-	}
-	return result
-}
-
-func (c Cuboid) Subtract(other Cuboid) []Cuboid {
-	if !c.Intersects(other) {
-		return []Cuboid{c}
-	}
-
-	var result []Cuboid
-	for _, x := range c.x.Overlaps(other.x) {
-		for _, y := range c.y.Overlaps(other.y) {
-			for _, z := range c.z.Overlaps(other.z) {
-				part := Cuboid{x, y, z}
-				if part.Volume() > 0 && part.Intersects(c) && !part.Intersects(other) {
-					result = append(result, c)
-				}
-			}
-		}
-	}
-
-	return result
-}
-
-// cuboids are disjoint
-func SubtractCuboid(cuboids []Cuboid, sub Cuboid) []Cuboid {
-	var result []Cuboid
-
-	for _, cuboid := range cuboids {
-		if !cuboid.Intersects(sub) {
-			result = append(result, cuboid)
-		} else {
-			result = append(result, cuboid.Subtract(sub)...)
-		}
-	}
-	return result
-}
-
-// cuboids are disjoint
-func AddCuboid(cuboids []Cuboid, add Cuboid) []Cuboid {
-	remains := SubtractCuboid(cuboids, add)
-	remains = append(remains, add)
-	return remains
-}
-
 func Set(c Cuboid, grid map[Coord]bool) {
 	for x := c.x.min; x <= c.x.max; x++ {
 		for y := c.y.min; y <= c.y.max; y++ {
 			for z := c.z.min; z <= c.z.max; z++ {
-				grid[Coord{x, y, z}] = true
+				grid[Coord{x, y, z}] = c.isOn
 			}
 		}
 	}
 }
 
-func ParseLine(line string) Line {
+func ParseLine(line string) Cuboid {
 	var c Cuboid
 	var onOff string
 	_, err := fmt.Sscanf(line, "%s x=%d..%d,y=%d..%d,z=%d..%d",
@@ -259,15 +115,8 @@ func ParseLine(line string) Line {
 	if err != nil {
 		panic(err)
 	}
-	return Line{
-		c:    c,
-		isOn: onOff == "on",
-	}
-}
-
-type Line struct {
-	c    Cuboid
-	isOn bool
+	c.isOn = onOff == "on"
+	return c
 }
 
 func (a Interval) ExtentWith(b Interval) Interval {
@@ -277,57 +126,74 @@ func (a Interval) ExtentWith(b Interval) Interval {
 	}
 }
 
+// Get all the distinct numbers in a list of intervals and sort them
+func GetDistinctSorted(ivs []Interval) []int {
+	xs := map[int]bool{}
+	for _, iv := range ivs {
+		xs[iv.min] = true
+		xs[iv.max] = true
+	}
+	distinct := util.Keys(xs)
+	sort.Ints(distinct)
+	return distinct
+}
+
+// Returns a map from value --> index and a list of lengths
+func MakeDistinctIntervals(ivs []Interval) (map[int]int, []int) {
+	xs := GetDistinctSorted(ivs)
+
+	m := map[int]int{}
+	lens := []int{1}
+
+	m[xs[0]] = 0
+
+	for i := 1; i < len(xs); i++ {
+		a := xs[i-1]
+		b := xs[i]
+		lens = append(lens, b-a-1, 1) // exclusive on both ends
+		m[b] = len(lens) - 1
+	}
+
+	return m, lens
+}
+
+func IndexCuboids(lines []Cuboid) ([]Cuboid, []int, []int, []int) {
+	xM, xL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.x }))
+	// fmt.Printf("xs: (%v) %v\n\n", xL, xM)
+
+	yM, yL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.y }))
+	// fmt.Printf("ys: (%v) %v\n\n", yM, yL)
+
+	zM, zL := MakeDistinctIntervals(util.Map(lines, func(line Cuboid) Interval { return line.z }))
+	// fmt.Printf("ys: (%v) %v\n\n", zM, zL)
+
+	return util.Map(lines, func(c Cuboid) Cuboid {
+		return Cuboid{
+			x:    Interval{min: xM[c.x.min], max: xM[c.x.max]},
+			y:    Interval{min: yM[c.y.min], max: yM[c.y.max]},
+			z:    Interval{min: zM[c.z.min], max: zM[c.z.max]},
+			isOn: c.isOn,
+		}
+	}), xL, yL, zL
+}
+
 func main() {
 	linesText := util.ReadLines(os.Args[1])
 	lines := util.Map(linesText, ParseLine)
 
-	extent := Cuboid{}
-	for _, line := range lines {
-		if line.isOn {
-			cuboid := line.c
-			extent.x = extent.x.ExtentWith(cuboid.x)
-			extent.y = extent.y.ExtentWith(cuboid.y)
-			extent.z = extent.z.ExtentWith(cuboid.z)
-		}
+	cubes, xL, yL, zL := IndexCuboids(lines)
+	// fmt.Printf("Cubes: %#v\n", cubes)
+	start := time.Now()
+	grid := map[Coord]bool{}
+	for i, c := range cubes {
+		Set(c, grid)
+		fmt.Printf("%3d elapsed: %v\n", i, time.Since(start))
 	}
 
-	var disjointRects []Rect
-
-	start := time.Now()
-
-	// bigOnes := util.Filter(lines, func(line Line) bool { return !line.c.InClipArea() })
-
-	num := 0
-	for z := extent.z.min; z <= extent.z.max; z++ {
-		for _, line := range lines {
-			c := line.c
-			if c.z.min <= z && z <= c.z.max {
-				r := Rect{
-					x: line.c.x,
-					y: line.c.y,
-				}
-				if line.isOn {
-					disjointRects = AddRects(disjointRects, r)
-				} else {
-					disjointRects = SubtractRects(disjointRects, r)
-				}
-				disjointRects = util.Filter(disjointRects, func(r Rect) bool { return r.Area() > 0 })
-
-				// fmt.Printf("%d %s -> %d disjoint rects\n",
-				// 	i, linesText[i], len(disjointRects),
-				// )
-			}
-		}
-
-		n := 0
-		for _, rect := range disjointRects {
-			n += rect.Area()
-		}
-
-		num += n
-		nDone := z - extent.z.min + 1
-		if nDone%1000 == 0 {
-			fmt.Printf("y=%d done %d after %v, %d rects area=%d\n", z, nDone, time.Since(start), len(disjointRects), n)
+	var num int64 = 0
+	for c, v := range grid {
+		if v {
+			num += int64(xL[c.x]) * int64(yL[c.y]) * int64(zL[c.z])
 		}
 	}
 
