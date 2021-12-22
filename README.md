@@ -17,7 +17,9 @@ While driving in the afternoon, I came up with two new ideas:
 
 This is what I wound up doing. It was quite fast on the third sample, but was taking a long but not interminable time on my input (maybe an hour?). I replaced my `map[Coord]bool` structure with a gigantic array (`[1663][1663][1663]bool`) and it ran in ~10s.
 
-@znrk found a similar solution: <https://gist.github.com/znkr/a1c8dfcbedaabb5b97a7886f06a40282>. He made a clever choice to change the closed intervals to open intervals by adding one to the right end of each. This cuts the size of the giant grid by a factor of 8.
+@znrk found a similar solution: <https://gist.github.com/znkr/a1c8dfcbedaabb5b97a7886f06a40282>. He made a clever choice to change the closed intervals to open intervals by adding one to the right end of each. This cuts the size of the giant grid by a factor of 8. It seems you can't have dynamically-sized multidimensional arrays in Go. Switching to a big buffer and calculating offsets by hand shaved a bit more time off. All told, I'm at ~1s for part 2.
+
+I'm pretty curious to see how others got this to work using the more geometric approaches.
 
 ### Day 21
 
