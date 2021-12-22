@@ -171,7 +171,7 @@ func MakeDistinctIntervals(ivs []Interval) (map[int]int, []int) {
 		a := xs[i]
 		b := xs[i+1]
 		lens = append(lens, b-a)
-		m[b] = len(lens) - 1
+		m[b] = len(lens)
 	}
 
 	return m, lens
