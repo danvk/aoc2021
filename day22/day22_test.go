@@ -9,15 +9,15 @@ func add(a, b int) int {
 	return a + b
 }
 
-func Test(t *testing.T) {
+func TestClip(t *testing.T) {
 	tests := map[string]struct {
-		a    int
-		b    int
-		want int
+		a    string
+		want Cuboid
 	}{
-		"positive": {a: 10, b: 20, want: 30},
-		"zero":     {a: 0, b: 1, want: 1},
-		"negative": {a: -10, b: 10, want: 1},
+		"outside": {
+			a:    "on x=-54112..-39298,y=-85059..-49293,z=-27449..7877",
+			want: Cuboid{},
+		},
 	}
 
 	for name, tc := range tests {
