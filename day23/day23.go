@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc/graph"
 	"aoc/util"
 	"fmt"
 	"os"
@@ -50,10 +51,11 @@ func (s State) String() string {
 	}
 
 	return fmt.Sprintf(
-		"#############\n%s\n%s\n%s\n  #########",
+		"#############\n%s\n%s\n%s\n  ######### %d",
 		strings.Join(rows[0], ""),
 		strings.Join(rows[1], ""),
 		strings.Join(rows[2], ""),
+		s.cost,
 	)
 }
 
@@ -87,10 +89,19 @@ func (s *State) AmphipodAt(x, y int) (Amphipod, bool) {
 	return s.amphipods[0], false
 }
 
-func (s *State) IsHallwayOpen(start, stop int) bool {
+func (s *State) IsHallwayOpen(start, stop int, selfIdx int) bool {
 	x1, x2 := util.Ordered(start, stop)
+	for i, a := range s.amphipods {
+		if i != selfIdx && a.y == 0 && a.x >= x1 && a.x <= x2 {
+			return false
+		}
+	}
+	return true
+}
+
+func (s *State) IsComplete() bool {
 	for _, a := range s.amphipods {
-		if a.y == 0 && a.x >= x1 && a.x <= x2 {
+		if a.x != destX[a.kind] {
 			return false
 		}
 	}
@@ -104,7 +115,7 @@ func abs(a int) int {
 	return a
 }
 
-func (s State) Move(idx int, x, y int) State {
+func (s State) Move(idx int, x, y int) *State {
 	// value receiver, so a copy is made for us
 	a := s.amphipods[idx]
 	moveD := abs(x-a.x) + abs(y-a.y)
@@ -113,11 +124,11 @@ func (s State) Move(idx int, x, y int) State {
 	s.cost += moveCost
 	s.amphipods[idx].x = x
 	s.amphipods[idx].y = y
-	return s
+	return &s
 }
 
-func (s *State) NextStates() []State {
-	var nextStates []State
+func (s *State) NextStates() []*State {
+	var nextStates []*State
 	for i, a := range s.amphipods {
 		dx := destX[a.kind]
 		if a.y == 2 && a.x == dx {
@@ -134,6 +145,7 @@ func (s *State) NextStates() []State {
 			bottom, okB := s.AmphipodAt(dx, 2)
 			_, okT := s.AmphipodAt(dx, 1)
 			dy := 2
+
 			if okT && okB {
 				continue // this column is fully occupied
 			} else if !okB {
@@ -144,7 +156,7 @@ func (s *State) NextStates() []State {
 				continue // already another amphipod here
 			}
 
-			if s.IsHallwayOpen(a.x, dx) {
+			if s.IsHallwayOpen(a.x, dx, i) {
 				nextStates = append(nextStates, s.Move(i, dx, dy))
 			}
 			continue
@@ -161,7 +173,7 @@ func (s *State) NextStates() []State {
 
 		// Move into hallway
 		for _, x := range hallwaySpots {
-			if s.IsHallwayOpen(a.x, x) {
+			if s.IsHallwayOpen(a.x, x, i) {
 				nextStates = append(nextStates, s.Move(i, x, 0))
 			}
 		}
@@ -172,9 +184,9 @@ func (s *State) NextStates() []State {
 
 var costs = map[string]int{
 	"A": 1,
-	"B": 2,
-	"C": 3,
-	"D": 4,
+	"B": 10,
+	"C": 100,
+	"D": 1000,
 }
 
 var destX = map[string]int{
@@ -189,8 +201,77 @@ var hallwaySpots = []int{
 	0, 1, 3, 5, 7, 9, 10,
 }
 
+type Graph struct{}
+
+func (g Graph) Neighbors(node *State) []graph.NodeWithCost[*State] {
+	nextState := node.NextStates()
+	return util.Map(nextState, func(s *State) graph.NodeWithCost[*State] {
+		return graph.NodeWithCost[*State]{
+			Node: s,
+			Cost: s.cost - node.cost,
+		}
+	})
+}
+
 func main() {
 	text := strings.Join(util.ReadLines(os.Args[1]), "\n")
 	state := ParseState(text)
 	fmt.Printf("Parsed state:\n%s\n", state)
+
+	g := Graph{}
+	cost, path := graph.Dijkstra[*State](g, &state, func(s *State) bool {
+		return s.IsComplete()
+	}, 16000)
+
+	fmt.Printf("Cost: %d\n\n", cost)
+	for i, s := range path {
+		fmt.Printf("%d\n%s\n\n", i, s)
+	}
+
+	// 16000 = too high
+	// 20000 = too high
+
+	/*
+		states := []*State{&state}
+		bestSoFar := -1
+		for len(states) > 0 {
+			nextStates := util.FlatMap(states, func(s *State) []*State { return s.NextStates() })
+			sort.Slice(nextStates, func(i, j int) bool {
+				return nextStates[i].cost < nextStates[j].cost
+			})
+			lowestCost := -1
+			for i, state := range nextStates {
+				if bestSoFar > 0 && state.cost >= bestSoFar {
+					nextStates = nextStates[:i-1]
+					break
+				}
+				if state.IsComplete() {
+					lowestCost = state.cost
+					if i == 0 {
+						nextStates = nil
+					} else {
+						nextStates = nextStates[:i-1]
+					}
+					bestSoFar = lowestCost
+					break
+				}
+			}
+
+			if lowestCost > 0 {
+				fmt.Printf("Best this round: %d, so far: %d\n", lowestCost, bestSoFar)
+			}
+
+			fmt.Printf("%d states\n", len(nextStates))
+			// if len(nextStates) > 0 {
+			// 	fmt.Printf("%s\n\n", nextStates[0])
+			// }
+
+			states = nextStates
+
+			// for i, s := range states {
+			// 	fmt.Printf("%d\n%s\n\n", i, s)
+			// }
+			// break
+		}
+	*/
 }

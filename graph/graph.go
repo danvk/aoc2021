@@ -2,6 +2,7 @@ package graph
 
 import (
 	"container/heap"
+	"fmt"
 )
 
 type NodeWithCost[T any] struct {
@@ -33,17 +34,18 @@ type Traversable[T comparable] interface {
 	Neighbors(node T) []NodeWithCost[T]
 }
 
-func Dijkstra[T comparable](graph Traversable[T], start T, end T) (int, []T) {
+func Dijkstra[T comparable](graph Traversable[T], start T, isDone func(T) bool, maxCost int) (int, []T) {
 	costs := make(map[T]int)
 	prev := make(map[T]T)
 
 	fringe := THeap[T]{NodeWithCost[T]{start, 0}}
 	heap.Init(&fringe)
 
+	n := 0
 	for len(fringe) > 0 {
 		cur := heap.Pop(&fringe).(NodeWithCost[T])
 		node, cost := cur.Node, cur.Cost
-		if node == end {
+		if isDone(node) {
 			path := []T{node}
 			for path[len(path)-1] != start {
 				prevNode, ok := prev[node]
@@ -64,10 +66,17 @@ func Dijkstra[T comparable](graph Traversable[T], start T, end T) (int, []T) {
 			if _, ok := prev[next]; !ok {
 				prev[next] = node
 				nextCost := cost + edgeCost
-				costs[next] = nextCost
-				nextNode := NodeWithCost[T]{next, nextCost}
-				heap.Push(&fringe, nextNode)
+				if nextCost < maxCost {
+					costs[next] = nextCost
+					nextNode := NodeWithCost[T]{next, nextCost}
+					heap.Push(&fringe, nextNode)
+				}
 			}
+		}
+		n++
+
+		if n%1000000 == 0 {
+			fmt.Printf("%d nodes, fringe size=%d, min cost=%d\n", n, len(fringe), cost)
 		}
 	}
 
