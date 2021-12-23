@@ -21,6 +21,17 @@ This is what I wound up doing. It was quite fast on the third sample, but was ta
 
 I'm pretty curious to see how others got this to work using the more geometric approaches.
 
+This `//go:embed` looks interesting: <https://github.com/pemoreau/advent-of-code-2021/blob/main/go/22/day22.go>
+
+@pemoreau seems to have gotten my initial approach to work: <https://github.com/pemoreau/advent-of-code-2021/blob/830619e40b11a0042875b8383978ed8bd1565e5a/go/22/cuboid.go#L75>
+
+This solution is fascinating:
+<https://topaz.github.io/paste/#XQAAAQCnAgAAAAAAAAAzHIoib6qqOe07MhJ0XsXE6K08G4Ps1pgTxGMtEZ+kpb0WiMmgclVAwbWGLuEqShaMvaIHbGSZQDr1DzD4YJdTRL4c/0gztLN1zvPRMMuPZI6AjcJ1jQMQwV/eQ4Xx+ZfU1PZoy8ITNoTLg8ND9SSxm0z9oF/VvJvPMcpFJJpTBmm89nO7Kj8zuP1/7GMgKDcDhV3H86rhgHybzKsU1vco+QkpaXh8sDhEfXUe0wM2szbwkYTiIp8UAJyT566Us7JiKvV0S7lxR7dkUDFnAliMQG+BOd+p0kZ8MhuDrFS2Ujxcq1NuqpMlRJVcYAu+2MoMVtqE0OGZQLXqGLMIiVVJuEkZw5OtZ7Pkpo0UcSOcjgq/7o97QucphHs0ZR8Kxnhh/W+3mIz4wqmyXgXqYQy3OqjiI56yy8n688wWq/KFyuzOTLDw+TSopvoOHvFZfB/z4+7ofeGsw0LqJU/tB1d1JQIc9G/WCgt/L18jsahMlvlYcMYrzUD8WeTzOps3J3761hCM>
+
+This is a slightly more legible version that I think is equivalent: <https://github.com/BradonZhang/advent-of-code-2021/blob/main/src/22.py#L30>
+
+The inclusion/exclusion hierarchy is actually a _tree_. For my input it has a depth of 15 and 35,924 nodes. Which is a lot but not excessive!
+
 ### Day 21
 
 Two very different implementations for part 1 and part 2 today, but neither was very difficult. The state size for part 2 never got larger than ~12,000.
