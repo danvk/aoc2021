@@ -13,13 +13,15 @@ func TestEncodeDecodePos(t *testing.T) {
 		"a": {x: 10, y: 0},
 		"b": {x: 2, y: 1},
 		"c": {x: 4, y: 2},
+		"d": {x: 6, y: 3},
+		"e": {x: 8, y: 4},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			enc := EncodePos(tc.x, tc.y)
 			dX, dY := DecodePos(enc)
-			if dX != tc.x || dY != tc.y {
+			if dX != tc.x || dY != tc.y || enc >= 27 {
 				t.Errorf("%v -> %d -> (%d, %d)", tc, enc, dX, dY)
 			}
 		})
@@ -29,6 +31,8 @@ func TestEncodeDecodePos(t *testing.T) {
 func TestEncodeFinal(t *testing.T) {
 	final := `#############
 #...........#
+###A#B#C#D###
+###A#B#C#D###
 ###A#B#C#D###
   #A#B#C#D#
   #########`
@@ -46,8 +50,10 @@ func TestEncodeFinal(t *testing.T) {
 
 func TestEncodeAndBack(t *testing.T) {
 	input := `#############
-#D..........#
-###B#C#B#.###
+#D........A.#
+###.#C#.#B###
+###B#C#B#B###
+###B#C#B#A###
   #A#D#C#A#
   #########`
 	state := ParseState(input)

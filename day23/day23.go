@@ -37,36 +37,40 @@ type Amphipod struct {
 }
 
 type State struct {
-	amphipods [8]Amphipod
+	amphipods [16]Amphipod
 	cost      int
 }
 
 func (s State) String() string {
-	var rows [3][]string
+	var rows [5][]string
 	rows[0] = strings.Split("#...........#", "")
 	rows[1] = strings.Split("###.#.#.#.###", "")
 	rows[2] = strings.Split("  #.#.#.#.#", "")
+	rows[3] = strings.Split("  #.#.#.#.#", "")
+	rows[4] = strings.Split("  #.#.#.#.#", "")
 	for _, a := range s.amphipods {
 		rows[a.y][a.x+1] = a.kind
 	}
 
 	return fmt.Sprintf(
-		"#############\n%s\n%s\n%s\n  ######### %d",
+		"#############\n%s\n%s\n%s\n%s\n%s\n  ######### %d",
 		strings.Join(rows[0], ""),
 		strings.Join(rows[1], ""),
 		strings.Join(rows[2], ""),
+		strings.Join(rows[3], ""),
+		strings.Join(rows[4], ""),
 		s.cost,
 	)
 }
 
 func ParseState(state string) State {
 	lines := strings.Split(state, "\n")
-	if len(lines) != 5 {
+	if len(lines) != 7 {
 		panic(lines)
 	}
 	s := State{}
 	i := 0
-	for y := 0; y <= 2; y++ {
+	for y := 0; y <= 4; y++ {
 		line := lines[1+y]
 		for x, c := range line {
 			if c >= 'A' && c <= 'D' {
@@ -76,6 +80,9 @@ func ParseState(state string) State {
 				i++
 			}
 		}
+	}
+	if i != 16 {
+		panic(i)
 	}
 	return s
 }
@@ -127,104 +134,121 @@ func (s State) Move(idx int, x, y int) *State {
 	return &s
 }
 
-// Returns a number between 0 and 40
+// Returns a number between 0 and 27
 func EncodePos(x, y int) int {
-	return y<<4 + x
+	if y == 0 {
+		return x
+	}
+	return 11 + 4*(y-1) + ((x - 2) / 2)
 }
 
 func DecodePos(n int) (x int, y int) {
-	return n & 0b1111, n >> 4
+	if n <= 10 {
+		return n, 0
+	}
+	n -= 11
+	y = 1 + n>>2
+	x = 2 + 2*(n&0b11)
+	return
+}
+
+func EncodeKind(k string) int {
+	switch k {
+	case "A":
+		return 1
+	case "B":
+		return 2
+	case "C":
+		return 3
+	case "D":
+		return 4
+	}
+	panic(k)
+}
+
+var kinds = []string{"A", "B", "C", "D"}
+
+func DecodeKind(x int) string {
+	return kinds[x-1]
 }
 
 func (s State) Encode() uint64 {
-	a1, a2 := -1, -1
-	b1, b2 := -1, -1
-	c1, c2 := -1, -1
-	d1, d2 := -1, -1
+	var vals [27]int
 	for _, a := range s.amphipods {
-		n := EncodePos(a.x, a.y)
-		switch a.kind {
-		case "A":
-			if a1 == -1 {
-				a1 = n
-			} else {
-				a1, a2 = util.Ordered(a1, n)
-			}
-		case "B":
-			if b1 == -1 {
-				b1 = n
-			} else {
-				b1, b2 = util.Ordered(b1, n)
-			}
-		case "C":
-			if c1 == -1 {
-				c1 = n
-			} else {
-				c1, c2 = util.Ordered(c1, n)
-			}
-		case "D":
-			if d1 == -1 {
-				d1 = n
-			} else {
-				d1, d2 = util.Ordered(d1, n)
-			}
-		}
-	}
-	if a1 == -1 || a2 == -1 || b1 == -1 || b2 == -1 || c1 == -1 || c2 == -1 || d1 == -1 || d2 == -1 {
-		panic(s)
+		vals[EncodePos(a.x, a.y)] = EncodeKind(a.kind)
 	}
 
-	return uint64(a1)<<56 +
-		uint64(a2)<<48 +
-		uint64(b1)<<40 +
-		uint64(b2)<<32 +
-		uint64(c1)<<24 +
-		uint64(c2)<<16 +
-		uint64(d1)<<8 +
-		uint64(d2)
+	var result uint64 = 0
+	for _, v := range vals {
+		result *= 5
+		result += uint64(v)
+	}
+	return result
 }
+
+// #############
+// #...........#
+// ###A#B#C#D###
+//   #A#B#C#D#
+//   #A#B#C#D#
+//   #A#B#C#D#
+//   #########
+// 27 squares
+// 16 amphipods
+//  2 ** 64 = 18446744073709551616L
+// 27 ** 16 = 79766443076872509863361L
+//  5 ** 27 = 7450580596923828125L we have a winner!
 
 var decodeKinds = []string{"D", "D", "C", "C", "B", "B", "A", "A"}
 
 func Decode(n uint64) (res State) {
-	for i, kind := range decodeKinds {
-		x, y := DecodePos(int(n & 0xff))
-		res.amphipods[i].kind = kind
-		res.amphipods[i].x = x
-		res.amphipods[i].y = y
-		n = n >> 8
+	i := 0
+	pos := 26
+	for n > 0 {
+		v := n % 5
+		if v > 0 {
+			x, y := DecodePos(pos)
+			res.amphipods[i].x = x
+			res.amphipods[i].y = y
+			res.amphipods[i].kind = DecodeKind(int(v))
+			i++
+		}
+		n = n / 5
+		pos--
 	}
+	return
+}
 
+func (s *State) ToGrid() (result [5][11]string) {
+	for _, a := range s.amphipods {
+		result[a.y][a.x] = a.kind
+	}
 	return
 }
 
 func (s *State) NextStates() []*State {
 	var nextStates []*State
+	g := s.ToGrid()
+
 	for i, a := range s.amphipods {
 		dx := destX[a.kind]
-		if a.y == 2 && a.x == dx {
+		if a.y == 4 && a.x == dx {
 			continue // already in its place, no need to move
-		}
-		if a.y == 1 && a.x == dx {
-			if below, ok := s.AmphipodAt(a.x, 2); ok && below.kind == a.kind {
-				continue // this stack is already set
-			}
 		}
 
 		if a.y == 0 {
-			// Move to final destination if possible
-			bottom, okB := s.AmphipodAt(dx, 2)
-			_, okT := s.AmphipodAt(dx, 1)
-			dy := 2
-
-			if okT && okB {
-				continue // this column is fully occupied
-			} else if !okB {
-				// bottom slot is open, let's take it!
-			} else if bottom.kind == a.kind {
-				dy = 1 // bottom slot is taken by same kind of amphipod, so we can take the top slot
-			} else {
-				continue // already another amphipod here
+			dy := -1
+			for y := 4; y >= 1; y-- {
+				if g[y][dx] == "" {
+					dy = y
+					break
+				}
+				if g[y][dx] != a.kind {
+					break // wrong amphipod here; can't enter column
+				}
+			}
+			if dy == -1 {
+				continue
 			}
 
 			if s.IsHallwayOpen(a.x, dx, i) {
@@ -233,16 +257,34 @@ func (s *State) NextStates() []*State {
 			continue
 		}
 
-		if a.y == 2 {
-			_, ok := s.AmphipodAt(a.x, 1)
-			if ok {
-				continue // someone is on top of us, we can't move
+		// Are we stuck?
+		isFree := true
+		for y := 1; y < a.y; y++ {
+			if g[y][a.x] != "" {
+				isFree = false
+				break
 			}
-		} else if a.y != 1 {
-			panic(a)
+		}
+		if !isFree {
+			continue
 		}
 
-		// TODO: move directly to destination
+		// Is the stack set from us and below? If so, don't move.
+		if a.x == dx {
+			isSet := true
+			for y := a.y + 1; y <= 4; y++ {
+				if g[y][a.x] != a.kind {
+					isSet = false
+					break
+				}
+			}
+			if isSet {
+				continue
+			}
+		}
+
+		// TODO: move directly to destination?
+
 		// Move into hallway
 		for _, x := range hallwaySpots {
 			if s.IsHallwayOpen(a.x, x, i) {
@@ -279,18 +321,6 @@ func (g Graph) Neighbors(n uint64) []graph.NodeWithCost[uint64] {
 	node := Decode(n)
 	nextState := node.NextStates()
 
-	/*
-		for _, s := range nextState {
-			back := Decode(s.Encode())
-			back.cost = s.cost
-			if s.String() != back.String() {
-				panic(s.String())
-			}
-
-			fmt.Printf("%d ->\n%s\n\n", n, s)
-		}
-	*/
-
 	return util.Map(nextState, func(s *State) graph.NodeWithCost[uint64] {
 		return graph.NodeWithCost[uint64]{
 			Node: s.Encode(),
@@ -307,28 +337,9 @@ var final = `#############
 #...........#
 ###A#B#C#D###
   #A#B#C#D#
+  #A#B#C#D#
+  #A#B#C#D#
   #########`
-
-// 3470 for step3
-// 3530 for step4
-
-var step3 = `#############
-#.....D.....#
-###B#.#C#D###
-  #A#B#C#A#
-  #########`
-
-var step4 = `#############
-#.....D.....#
-###.#B#C#D###
-  #A#B#C#A#
-  #########`
-
-// var step3b = `#############
-// #...B.D.....#
-// ###.#.#C#D###
-//   #A#B#C#A#
-//   #########`
 
 func main() {
 	text := strings.Join(util.ReadLines(os.Args[1]), "\n")
@@ -352,23 +363,12 @@ func main() {
 		fmt.Printf("\nDecoded:\n%s\n", back)
 	*/
 
-	/*
-		for _, n := range []uint64{1306616892133605379,
-			1306628986862174211,
-			1306628986761510915,
-			1306616892485926915,
-			1306610295063841064} {
-			s := Decode(n)
-			fmt.Printf("%d:\n%s\n\n", n, s)
-		}
-	*/
-
 	g := Graph{}
 	cost, path := graph.Dijkstra[uint64](g, state.Encode(), func(n uint64) bool {
 		return n == stop
 		// s := Decode(n)
 		// return s.IsComplete()
-	}, 16000)
+	}, 50000)
 
 	fmt.Printf("\n\nFinal path:\n")
 	fmt.Printf("Cost: %d\n\n", cost)
