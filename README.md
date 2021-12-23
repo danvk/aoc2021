@@ -10,7 +10,7 @@ The main trick was to switch from using `*State` as the node in my Dijkstra to a
 
 Part two just barely fits in a `uint64`. There are 27 squares in the room in part two and five possible states for each square (A, B, C, D, empty). And as luck would have it, `5**27 < 2**64`. So I can get away with using `uint64`s for part two as well. Dijkstra is pretty magical for problems like this!
 
-**A few hours later** Upon further reflection, the de-duping aspect of using the `uint64` representation is the only thing that really matters. I switched to using `string` instead with the display value as the encoding and it also works great.
+**A few hours later** Upon further reflection, the de-duping aspect of using the `uint64` representation is the only thing that really matters. I switched to using `string` instead with the display value as the encoding and it also works great. Dijkstra was slow with `*State` because there were probably millions of duplicate representations of the same state.
 
 ### Day 22
 
