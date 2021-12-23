@@ -2,6 +2,14 @@
 
 ## Advent of Code
 
+### Day 23
+
+Another challenging one. I'm glad I went overboard and wrote a very generic Dijkstra for day 15, it came in handy today. I wish I hadn't had a tricky bug in it, though!
+
+The main trick was to switch from using `*State` as the node in my Dijkstra to a `uint64` encoding. Presumably this eliminated tons of copying and memory pressure, and got me deduping of redundant states.
+
+Part two just barely fits in a `uint64`. There are 27 squares in the room in part two and five possible states for each square (A, B, C, D, empty). And as luck would have it, `5**27 < 2**64`. So I can get away with using `uint64`s for part two as well. Dijkstra is pretty magical for problems like this!
+
 ### Day 22
 
 Hardest day by far for me; My first instinct was to implement union and difference by splitting up intersecting cuboids into sub-cuboids. There could be up to 27 if you're really unlucky. It seems that some people on reddit got something like this to work, but mine completely blew up on the sample inputs.
