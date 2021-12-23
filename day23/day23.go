@@ -127,6 +127,77 @@ func (s State) Move(idx int, x, y int) *State {
 	return &s
 }
 
+// Returns a number between 0 and 40
+func EncodePos(x, y int) int {
+	return y<<4 + x
+}
+
+func DecodePos(n int) (x int, y int) {
+	return n & 0b1111, n >> 4
+}
+
+func (s State) Encode() uint64 {
+	a1, a2 := -1, -1
+	b1, b2 := -1, -1
+	c1, c2 := -1, -1
+	d1, d2 := -1, -1
+	for _, a := range s.amphipods {
+		n := EncodePos(a.x, a.y)
+		switch a.kind {
+		case "A":
+			if a1 == -1 {
+				a1 = n
+			} else {
+				a1, a2 = util.Ordered(a1, n)
+			}
+		case "B":
+			if b1 == -1 {
+				b1 = n
+			} else {
+				b1, b2 = util.Ordered(b1, n)
+			}
+		case "C":
+			if c1 == -1 {
+				c1 = n
+			} else {
+				c1, c2 = util.Ordered(c1, n)
+			}
+		case "D":
+			if d1 == -1 {
+				d1 = n
+			} else {
+				d1, d2 = util.Ordered(d1, n)
+			}
+		}
+	}
+	if a1 == -1 || a2 == -1 || b1 == -1 || b2 == -1 || c1 == -1 || c2 == -1 || d1 == -1 || d2 == -1 {
+		panic(s)
+	}
+
+	return uint64(a1)<<56 +
+		uint64(a2)<<48 +
+		uint64(b1)<<40 +
+		uint64(b2)<<32 +
+		uint64(c1)<<24 +
+		uint64(c2)<<16 +
+		uint64(d1)<<8 +
+		uint64(d2)
+}
+
+var decodeKinds = []string{"D", "D", "C", "C", "B", "B", "A", "A"}
+
+func Decode(n uint64) (res State) {
+	for i, kind := range decodeKinds {
+		x, y := DecodePos(int(n & 0xff))
+		res.amphipods[i].kind = kind
+		res.amphipods[i].x = x
+		res.amphipods[i].y = y
+		n = n >> 8
+	}
+
+	return
+}
+
 func (s *State) NextStates() []*State {
 	var nextStates []*State
 	for i, a := range s.amphipods {
@@ -171,6 +242,7 @@ func (s *State) NextStates() []*State {
 			panic(a)
 		}
 
+		// TODO: move directly to destination
 		// Move into hallway
 		for _, x := range hallwaySpots {
 			if s.IsHallwayOpen(a.x, x, i) {
@@ -203,28 +275,105 @@ var hallwaySpots = []int{
 
 type Graph struct{}
 
-func (g Graph) Neighbors(node *State) []graph.NodeWithCost[*State] {
+func (g Graph) Neighbors(n uint64) []graph.NodeWithCost[uint64] {
+	node := Decode(n)
 	nextState := node.NextStates()
-	return util.Map(nextState, func(s *State) graph.NodeWithCost[*State] {
-		return graph.NodeWithCost[*State]{
-			Node: s,
+
+	/*
+		for _, s := range nextState {
+			back := Decode(s.Encode())
+			back.cost = s.cost
+			if s.String() != back.String() {
+				panic(s.String())
+			}
+
+			fmt.Printf("%d ->\n%s\n\n", n, s)
+		}
+	*/
+
+	return util.Map(nextState, func(s *State) graph.NodeWithCost[uint64] {
+		return graph.NodeWithCost[uint64]{
+			Node: s.Encode(),
 			Cost: s.cost - node.cost,
 		}
 	})
 }
 
+func (g Graph) String(n uint64) string {
+	return Decode(n).String()
+}
+
+var final = `#############
+#...........#
+###A#B#C#D###
+  #A#B#C#D#
+  #########`
+
+// 3470 for step3
+// 3530 for step4
+
+var step3 = `#############
+#.....D.....#
+###B#.#C#D###
+  #A#B#C#A#
+  #########`
+
+var step4 = `#############
+#.....D.....#
+###.#B#C#D###
+  #A#B#C#A#
+  #########`
+
+// var step3b = `#############
+// #...B.D.....#
+// ###.#.#C#D###
+//   #A#B#C#A#
+//   #########`
+
 func main() {
 	text := strings.Join(util.ReadLines(os.Args[1]), "\n")
+	// text := step3
 	state := ParseState(text)
 	fmt.Printf("Parsed state:\n%s\n", state)
 
+	/*
+		for i, s := range state.NextStates() {
+			fmt.Printf("%d %d:\n%s\n\n", i, s.Encode(), s)
+		}
+	*/
+
+	stop := ParseState(final).Encode()
+
+	/*
+		n := state.Encode()
+		fmt.Printf("Encoded: %d\n", n)
+
+		back := Decode(n)
+		fmt.Printf("\nDecoded:\n%s\n", back)
+	*/
+
+	/*
+		for _, n := range []uint64{1306616892133605379,
+			1306628986862174211,
+			1306628986761510915,
+			1306616892485926915,
+			1306610295063841064} {
+			s := Decode(n)
+			fmt.Printf("%d:\n%s\n\n", n, s)
+		}
+	*/
+
 	g := Graph{}
-	cost, path := graph.Dijkstra[*State](g, &state, func(s *State) bool {
-		return s.IsComplete()
+	cost, path := graph.Dijkstra[uint64](g, state.Encode(), func(n uint64) bool {
+		return n == stop
+		// s := Decode(n)
+		// return s.IsComplete()
 	}, 16000)
 
+	fmt.Printf("\n\nFinal path:\n")
 	fmt.Printf("Cost: %d\n\n", cost)
-	for i, s := range path {
+	for i, n := range path {
+		s := Decode(n)
 		fmt.Printf("%d\n%s\n\n", i, s)
 	}
 

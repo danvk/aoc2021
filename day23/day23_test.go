@@ -1,31 +1,61 @@
 package main
 
 import (
-	"reflect"
 	"testing"
 )
 
-func add(a, b int) int {
-	return a + b
-}
-
-func Test(t *testing.T) {
+func TestEncodeDecodePos(t *testing.T) {
 	tests := map[string]struct {
-		a    int
-		b    int
-		want int
+		x int
+		y int
 	}{
-		"positive": {a: 10, b: 20, want: 30},
-		"zero":     {a: 0, b: 1, want: 1},
-		"negative": {a: -10, b: 10, want: 1},
+		"0": {x: 0, y: 0},
+		"a": {x: 10, y: 0},
+		"b": {x: 2, y: 1},
+		"c": {x: 4, y: 2},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := add(tc.a, tc.b)
-			if !reflect.DeepEqual(tc.want, got) {
-				t.Errorf("%v = %#v, want %#v", tc, got, tc.want)
+			enc := EncodePos(tc.x, tc.y)
+			dX, dY := DecodePos(enc)
+			if dX != tc.x || dY != tc.y {
+				t.Errorf("%v -> %d -> (%d, %d)", tc, enc, dX, dY)
 			}
 		})
+	}
+}
+
+func TestEncodeFinal(t *testing.T) {
+	final := `#############
+#...........#
+###A#B#C#D###
+  #A#B#C#D#
+  #########`
+	state := ParseState(final)
+
+	n1 := state.Encode()
+
+	state.amphipods[1], state.amphipods[0] = state.amphipods[0], state.amphipods[1]
+	n2 := state.Encode()
+
+	if n1 != n2 {
+		t.Errorf("Multiple final state encodings: %d, %d", n1, n2)
+	}
+}
+
+func TestEncodeAndBack(t *testing.T) {
+	input := `#############
+#D..........#
+###B#C#B#.###
+  #A#D#C#A#
+  #########`
+	state := ParseState(input)
+
+	n := state.Encode()
+	back := Decode(n)
+
+	if state.String() != back.String() {
+		t.Errorf("Mismatch:\n%s\nvs:\n%s", state, back)
 	}
 }
