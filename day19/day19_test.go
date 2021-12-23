@@ -116,25 +116,25 @@ func TestFindBestOverlap(t *testing.T) {
 	}
 }
 
-func TestNumOverlapping(t *testing.T) {
-	tests := map[string]struct {
-		a    []Point
-		b    []Point
-		want int
-	}{
-		"some": {a: []Point{{0, 0, 0}, {1, 0, 0}}, b: []Point{{1, 0, 0}, {1, 1, 0}}, want: 1},
-		"zero": {a: []Point{}, b: []Point{{1, 0, 0}, {1, 1, 0}}, want: 0},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			got := NumOverlapping(tc.a, tc.b)
-			if !reflect.DeepEqual(tc.want, got) {
-				t.Errorf("%v = %#v, want %#v", tc, got, tc.want)
-			}
-		})
-	}
-}
+// func TestNumOverlapping(t *testing.T) {
+// 	tests := map[string]struct {
+// 		a    []Point
+// 		b    []Point
+// 		want int
+// 	}{
+// 		"some": {a: []Point{{0, 0, 0}, {1, 0, 0}}, b: []Point{{1, 0, 0}, {1, 1, 0}}, want: 1},
+// 		"zero": {a: []Point{}, b: []Point{{1, 0, 0}, {1, 1, 0}}, want: 0},
+// 	}
+//
+// 	for name, tc := range tests {
+// 		t.Run(name, func(t *testing.T) {
+// 			got := NumOverlapping(tc.a, tc.b)
+// 			if !reflect.DeepEqual(tc.want, got) {
+// 				t.Errorf("%v = %#v, want %#v", tc, got, tc.want)
+// 			}
+// 		})
+// 	}
+// }
 
 func add(a, b int) int {
 	return a + b
