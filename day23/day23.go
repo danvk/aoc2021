@@ -53,13 +53,13 @@ func (s State) String() string {
 	}
 
 	return fmt.Sprintf(
-		"#############\n%s\n%s\n%s\n%s\n%s\n  ######### %d",
+		"#############\n%s\n%s\n%s\n%s\n%s\n  #########",
 		strings.Join(rows[0], ""),
 		strings.Join(rows[1], ""),
 		strings.Join(rows[2], ""),
 		strings.Join(rows[3], ""),
 		strings.Join(rows[4], ""),
-		s.cost,
+		// s.cost,
 	)
 }
 
@@ -87,28 +87,10 @@ func ParseState(state string) State {
 	return s
 }
 
-func (s *State) AmphipodAt(x, y int) (Amphipod, bool) {
-	for _, a := range s.amphipods {
-		if a.x == x && a.y == y {
-			return a, true
-		}
-	}
-	return s.amphipods[0], false
-}
-
 func (s *State) IsHallwayOpen(start, stop int, selfIdx int) bool {
 	x1, x2 := util.Ordered(start, stop)
 	for i, a := range s.amphipods {
 		if i != selfIdx && a.y == 0 && a.x >= x1 && a.x <= x2 {
-			return false
-		}
-	}
-	return true
-}
-
-func (s *State) IsComplete() bool {
-	for _, a := range s.amphipods {
-		if a.x != destX[a.kind] {
 			return false
 		}
 	}
@@ -132,91 +114,6 @@ func (s State) Move(idx int, x, y int) *State {
 	s.amphipods[idx].x = x
 	s.amphipods[idx].y = y
 	return &s
-}
-
-// Returns a number between 0 and 27
-func EncodePos(x, y int) int {
-	if y == 0 {
-		return x
-	}
-	return 11 + 4*(y-1) + ((x - 2) / 2)
-}
-
-func DecodePos(n int) (x int, y int) {
-	if n <= 10 {
-		return n, 0
-	}
-	n -= 11
-	y = 1 + n>>2
-	x = 2 + 2*(n&0b11)
-	return
-}
-
-func EncodeKind(k string) int {
-	switch k {
-	case "A":
-		return 1
-	case "B":
-		return 2
-	case "C":
-		return 3
-	case "D":
-		return 4
-	}
-	panic(k)
-}
-
-var kinds = []string{"A", "B", "C", "D"}
-
-func DecodeKind(x int) string {
-	return kinds[x-1]
-}
-
-func (s State) Encode() uint64 {
-	var vals [27]int
-	for _, a := range s.amphipods {
-		vals[EncodePos(a.x, a.y)] = EncodeKind(a.kind)
-	}
-
-	var result uint64 = 0
-	for _, v := range vals {
-		result *= 5
-		result += uint64(v)
-	}
-	return result
-}
-
-// #############
-// #...........#
-// ###A#B#C#D###
-//   #A#B#C#D#
-//   #A#B#C#D#
-//   #A#B#C#D#
-//   #########
-// 27 squares
-// 16 amphipods
-//  2 ** 64 = 18446744073709551616L
-// 27 ** 16 = 79766443076872509863361L
-//  5 ** 27 = 7450580596923828125L we have a winner!
-
-var decodeKinds = []string{"D", "D", "C", "C", "B", "B", "A", "A"}
-
-func Decode(n uint64) (res State) {
-	i := 0
-	pos := 26
-	for n > 0 {
-		v := n % 5
-		if v > 0 {
-			x, y := DecodePos(pos)
-			res.amphipods[i].x = x
-			res.amphipods[i].y = y
-			res.amphipods[i].kind = DecodeKind(int(v))
-			i++
-		}
-		n = n / 5
-		pos--
-	}
-	return
 }
 
 func (s *State) ToGrid() (result [5][11]string) {
@@ -283,8 +180,6 @@ func (s *State) NextStates() []*State {
 			}
 		}
 
-		// TODO: move directly to destination?
-
 		// Move into hallway
 		for _, x := range hallwaySpots {
 			if s.IsHallwayOpen(a.x, x, i) {
@@ -317,20 +212,20 @@ var hallwaySpots = []int{
 
 type Graph struct{}
 
-func (g Graph) Neighbors(n uint64) []graph.NodeWithCost[uint64] {
-	node := Decode(n)
+func (g Graph) Neighbors(n string) []graph.NodeWithCost[string] {
+	node := ParseState(n)
 	nextState := node.NextStates()
 
-	return util.Map(nextState, func(s *State) graph.NodeWithCost[uint64] {
-		return graph.NodeWithCost[uint64]{
-			Node: s.Encode(),
+	return util.Map(nextState, func(s *State) graph.NodeWithCost[string] {
+		return graph.NodeWithCost[string]{
+			Node: s.String(),
 			Cost: s.cost - node.cost,
 		}
 	})
 }
 
-func (g Graph) String(n uint64) string {
-	return Decode(n).String()
+func (g Graph) String(n string) string {
+	return n
 }
 
 var final = `#############
@@ -342,85 +237,14 @@ var final = `#############
   #########`
 
 func main() {
-	text := strings.Join(util.ReadLines(os.Args[1]), "\n")
-	// text := step3
-	state := ParseState(text)
-	fmt.Printf("Parsed state:\n%s\n", state)
-
-	/*
-		for i, s := range state.NextStates() {
-			fmt.Printf("%d %d:\n%s\n\n", i, s.Encode(), s)
-		}
-	*/
-
-	stop := ParseState(final).Encode()
-
-	/*
-		n := state.Encode()
-		fmt.Printf("Encoded: %d\n", n)
-
-		back := Decode(n)
-		fmt.Printf("\nDecoded:\n%s\n", back)
-	*/
+	start := strings.Join(util.ReadLines(os.Args[1]), "\n")
 
 	g := Graph{}
-	cost, path := graph.Dijkstra[uint64](g, state.Encode(), func(n uint64) bool {
-		return n == stop
-		// s := Decode(n)
-		// return s.IsComplete()
-	}, 50000)
+	cost, path := graph.Dijkstra[string](g, start, final)
 
 	fmt.Printf("\n\nFinal path:\n")
-	fmt.Printf("Cost: %d\n\n", cost)
-	for i, n := range path {
-		s := Decode(n)
-		fmt.Printf("%d\n%s\n\n", i, s)
+	for i, s := range path {
+		fmt.Printf("%d\n%s  cost: %d\n\n", i, s.Node, s.Cost)
 	}
-
-	// 16000 = too high
-	// 20000 = too high
-
-	/*
-		states := []*State{&state}
-		bestSoFar := -1
-		for len(states) > 0 {
-			nextStates := util.FlatMap(states, func(s *State) []*State { return s.NextStates() })
-			sort.Slice(nextStates, func(i, j int) bool {
-				return nextStates[i].cost < nextStates[j].cost
-			})
-			lowestCost := -1
-			for i, state := range nextStates {
-				if bestSoFar > 0 && state.cost >= bestSoFar {
-					nextStates = nextStates[:i-1]
-					break
-				}
-				if state.IsComplete() {
-					lowestCost = state.cost
-					if i == 0 {
-						nextStates = nil
-					} else {
-						nextStates = nextStates[:i-1]
-					}
-					bestSoFar = lowestCost
-					break
-				}
-			}
-
-			if lowestCost > 0 {
-				fmt.Printf("Best this round: %d, so far: %d\n", lowestCost, bestSoFar)
-			}
-
-			fmt.Printf("%d states\n", len(nextStates))
-			// if len(nextStates) > 0 {
-			// 	fmt.Printf("%s\n\n", nextStates[0])
-			// }
-
-			states = nextStates
-
-			// for i, s := range states {
-			// 	fmt.Printf("%d\n%s\n\n", i, s)
-			// }
-			// break
-		}
-	*/
+	fmt.Printf("Total Cost: %d\n\n", cost)
 }

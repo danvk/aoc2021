@@ -36,7 +36,7 @@ type Traversable[T comparable] interface {
 	String(node T) string
 }
 
-func Dijkstra[T comparable](graph Traversable[T], start T, isDone func(T) bool, maxCost int) (int, []T) {
+func Dijkstra[T comparable](graph Traversable[T], start T, stop T) (int, []NodeWithCost[T]) {
 	costs := make(map[T]int)
 	prev := make(map[T]T)
 
@@ -50,25 +50,24 @@ func Dijkstra[T comparable](graph Traversable[T], start T, isDone func(T) bool, 
 		node, cost := cur.Node, cur.Cost
 		// fmt.Printf("node: %v cost %d\n%s\n\n", node, cost, graph.String(node))
 
-		if isDone(node) {
-			path := []T{node}
-			pathCosts := []int{cost}
-			for path[len(path)-1] != start {
+		if node == stop {
+			path := []NodeWithCost[T]{{Node: node, Cost: cost}}
+			for path[len(path)-1].Node != start {
 				prevNode, ok := prev[node]
 				if !ok {
 					panic(node)
 				}
 				node = prevNode
-				path = append(path, node)
-				pathCosts = append(pathCosts, costs[prevNode])
+				path = append(path, NodeWithCost[T]{
+					Node: node,
+					Cost: costs[prevNode],
+				})
 			}
 			for i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {
 				path[i], path[j] = path[j], path[i]
 			}
-			for i, j := 0, len(pathCosts)-1; i < j; i, j = i+1, j-1 {
-				pathCosts[i], pathCosts[j] = pathCosts[j], pathCosts[i]
-			}
-			fmt.Printf("costs: %v\n", pathCosts)
+			fmt.Printf("final fringe size: %d\n", len(fringe))
+			fmt.Printf("final state size: %d\n", len(prev))
 			return cost, path
 		}
 
@@ -77,12 +76,9 @@ func Dijkstra[T comparable](graph Traversable[T], start T, isDone func(T) bool, 
 			nextCost := cost + edgeCost
 			if c, ok := costs[next]; !ok || nextCost < c {
 				prev[next] = node
-				if nextCost < maxCost {
-					costs[next] = nextCost
-					nextNode := NodeWithCost[T]{next, nextCost}
-					heap.Push(&fringe, nextNode)
-					// fmt.Printf("pushing: %d\n%s\n\n", nextCost, graph.String(next))
-				}
+				costs[next] = nextCost
+				nextNode := NodeWithCost[T]{next, nextCost}
+				heap.Push(&fringe, nextNode)
 			}
 		}
 		n++
