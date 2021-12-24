@@ -55,6 +55,7 @@ add y 25  # x=1 y=25 z=349 w=5 digits=[7 9 2 4 6 8 9 9 9 9 1]
  add y 7  # x=1 y=12 z=9074 w=5 digits=[7 9 2 4 6 8 9 9 9 9 1]
  mul y x  # x=1 y=12 z=9074 w=5 digits=[7 9 2 4 6 8 9 9 9 9 1]
  add z y  # x=1 y=12 z=9086 w=5 digits=[7 9 2 4 6 8 9 9 9 9 1]
+
    inp w  # x=1 y=12 z=9086 w=7 digits=[9 2 4 6 8 9 9 9 9 1]
  mul x 0  # x=0 y=12 z=9086 w=7 digits=[9 2 4 6 8 9 9 9 9 1]
  add x z  # x=9086 y=12 z=9086 w=7 digits=[9 2 4 6 8 9 9 9 9 1]

@@ -6,6 +6,59 @@
 
 Valid plates seem quite rare! I generated a million random ones and didn't find a single valid plate. I'm guessing this has to be calculating some mathematical property, but primality would produce too many valid plates.
 
+mod: All mods are modulo 26.
+div: All divs are divide by either 1 or 26.
+inp: All inputs are to `w`, and only `inp` writes to `w`.
+
+This sequence is repeated 14 times:
+
+fn0:
+		mul x 0   # x=0
+		add x z   # x=z
+		mod x 26  # x=(z%26)
+		div z 1   # no-op
+
+fn1:
+    eql x w
+    eql x 0   # x=1 if x=w else 0
+    mul y 0
+    add y 25  # y=25
+    mul y x   # y=25*(x=1 if x=w else 0)
+    add y 1   # y=1 + 25*(x=1 if x=w else 0)
+    mul z y   # z = z * y
+    mul y 0   # y = w
+    add y w
+
+		if x == w {
+			z *= 25
+			x=0
+		} else {
+			z *= 26
+			x=1
+		}
+		y = w
+
+fn2:
+		mul x 0
+		add x z
+		mod x 26  # x = z % 26
+		div z 26  # z /= 26
+
+ D0: +14, +12
+ D1: +11, +8
+ D3: +11, +7
+ D4: +14, +4
+ D5: /26, -11, +4
+ D6: +12, +1
+ D7: /26, -1, +10
+ D8: +10, +8
+ D9: /26, -3, +12
+D10: /26, -4, +10
+D11: /26, -13, +15
+D12: /26, -8, +4
+D13: +13, +10
+D14: /26, -11, +9
+
 ### Day 23
 
 Another challenging one. I'm glad I went overboard and wrote a very generic Dijkstra for day 15, it came in handy today. I wish I hadn't had a tricky bug in it, though!

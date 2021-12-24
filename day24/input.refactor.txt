@@ -1,0 +1,118 @@
+inp w
+x=(z%26)  # x=0
+add x 14  # x=14
+fn1       # x=1, y=D1, z=0
+add y 12  # x=1, y=D1+12
+mul y x   # x=1, y=D1+12
+add z y   # x=1, y=D1+12, z=D1+12
+
+inp w     # w=D2
+x=(z%26)  # x=(D1+12)%26
+add x 11  # x=11 + (D1+12)%26
+fn1       # x=1, y=D2, z=(D1+12)*26
+add y 8   # y=D2+8
+mul y x   # y=D2+8
+add z y   # x=1, y=D2+8, z=(D1+12)*26+D2+8 √
+
+inp w     # w=D3
+x=(z%26)  # x=((D1+12)*26+D2+8)%26
+add x 11  # x=11 + ((D1+12)*26+D2+8)%26
+fn1
+add y 7
+mul y x
+add z y
+
+inp w     # w=D4
+x=(z%26)
+add x 14
+fn1
+add y 4
+mul y x
+add z y
+
+inp w     # w=D5
+x=(z%26)
+z/=26
+add x -11
+fn1
+add y 4
+mul y x
+add z y
+
+inp w     # w=D6
+x=(z%26)
+add x 12
+fn1
+add y 1
+mul y x
+add z y
+
+inp w     # w=D7
+x=(z%26)
+z/=26
+add x -1
+fn1
+add y 10
+mul y x
+add z y
+
+inp w     # w=D8
+x=(z%26)
+add x 10
+fn1
+add y 8
+mul y x
+add z y
+
+inp w     # w=D9
+x=(z%26)
+z/=26
+add x -3
+fn1
+add y 12
+mul y x
+add z y
+
+inp w     # w=D10
+x=(z%26)
+z/=26
+add x -4
+fn1
+add y 10
+mul y x
+add z y
+
+inp w     # w=D11
+x=(z%26)
+z/=26
+add x -13
+fn1
+add y 15
+mul y x
+add z y
+
+inp w     # w=D12
+x=(z%26)
+z/=26
+add x -8
+fn1
+add y 4
+mul y x
+add z y
+
+inp w     # w=D13
+x=(z%26)
+add x 13
+fn1
+add y 10
+mul y x
+add z y
+
+inp w     # w=D14
+x=(z%26)
+z/=26
+add x -11
+fn1
+add y 9
+mul y x
+add z y
