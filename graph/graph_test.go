@@ -8,6 +8,10 @@ import (
 
 type UnweightedGraph map[string][]string
 
+func (g UnweightedGraph) String(n string) string {
+	return n
+}
+
 func (g UnweightedGraph) Neighbors(n string) []NodeWithCost[string] {
 	nodes, ok := g[n]
 	if !ok {
@@ -27,7 +31,12 @@ func TestDijkstra(t *testing.T) {
 	}
 
 	actual, path := Dijkstra[string](g, "a", "d")
-	if actual != 2 || !reflect.DeepEqual(path, []string{"a", "b", "d"}) {
-		t.Errorf("Dijkstra(g, a, b) = %d, %s want 2, a->b->d", actual, path)
+	want := []NodeWithCost[string]{
+		{"a", 0},
+		{"b", 1},
+		{"d", 2},
+	}
+	if actual != 2 || !reflect.DeepEqual(path, want) {
+		t.Errorf("Dijkstra(g, a, b) = %d, %#v want 2, %#v", actual, path, want)
 	}
 }
