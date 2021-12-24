@@ -125,6 +125,27 @@ func (s State) String() string {
 	)
 }
 
+func GetZLoop(digits []int) int64 {
+	var z int64 = 0
+
+	for i := 0; i < 14; i++ {
+		digit := digits[i]
+		step := steps[i]
+
+		x := z % 26
+		if step.div {
+			z = z / 26
+		}
+		x += step.a
+		w := int64(digit)
+		if x != w {
+			z = 26*z + w + step.b
+		}
+	}
+
+	return z
+}
+
 func (s State) RunStep(step Step) State {
 	z := s.reg[2]
 	x := z % 26
@@ -231,9 +252,9 @@ func main() {
 			fmt.Printf("\n\n   WE HAVE A WINNER! %v\n\n", inp)
 		}
 
-		var s2 State
-		s2.input = inp
-		z2 := GetZBySteps(s2)
+		// var s2 State
+		// s2.input = inp
+		z2 := GetZLoop(inp)
 		if z1 != z2 {
 			fmt.Printf("Mismatch for input: %v %d != %d\n", inp, z1, z2)
 			return
