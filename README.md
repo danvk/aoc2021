@@ -111,6 +111,60 @@ d13 == d12 - 1
 28692991693698 (max d5, d6)
 28692994993698 (max d7, d8)  not correct
 
+28692994993698
+14 380 9893 257231 9893 257228 9893 257230 9893 380 14 0 19 0
+
+28692221693676
+14 380 9893 257231 9893 257221 9893 257227 9893 380 14 0 17 0
+
+ 0 2
+ 1 8
+ 2 6
+ 3 9 a= 14 b= 4
+ 4 2 a=-11 b= 4 match
+ 5 2 a= 12 b= 1
+ 6 2 a= -1 b=10 match
+ 7 1 a= 10 b= 8
+ 8 6 a= -3 b=12 match
+ 9 9 a= -4 b=10 match
+10 3 a=-13 b=15 match
+11 6 a= -8 b= 4 match
+12 8 a= 13 b=10
+13 7 a=-11 b= 9 match
+
+So YES, you have to hit all the `x==w` cases.
+
+d5=d6 seems to be a hard and fast constraint
+
+                     1 1 1 1
+       3 4 5 6 7 8 9 0 1 2 3
+[2 8 6 9 2 2 2 1 6 9 3 6 7 6] -> 0
+[4 9 3 9 2 6 6 4 9 6 4 8 9 8] -> 0
+[4 6 1 8 1 6 6 4 9 4 1 8 9 8] -> 0
+[5 7 5 8 1 4 4 3 8 8 2 9 5 4] -> 0
+[1 8 6 9 2 2 2 4 9 9 3 5 2 1] -> 0
+
+d4=d3-7
+d6=d5
+d8=d7+5
+d13=d12-1
+
+d9 has no obvious relation to d8
+d10 has no obvious relation to d9
+d11 has no obvious relation to d10
+
+So:
+d0-d2 have some relationship to d3 (1000 possibilities)
+d4=d3-7; 2 possibilities: 81, 92
+d5=d6; these may as well be 9
+d8=d7+5; these may as well be 49
+d13=d12-1; these may as well be 98
+
+57581443882998
+57592443882998
+57592993882998
+57592994982998
+
 ### Day 23
 
 Another challenging one. I'm glad I went overboard and wrote a very generic Dijkstra for day 15, it came in handy today. I wish I hadn't had a tricky bug in it, though!

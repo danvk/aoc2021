@@ -4,7 +4,6 @@ import (
 	"aoc/util"
 	"fmt"
 	"math/rand"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -38,6 +37,7 @@ var steps = []Step{
 
 // 28692221693676 = too low
 // 28692994993698 = incorrect
+// 57592994982998 = incorrect
 // 89999999999999 = too high
 // 900000000000000 = too high
 // 13579246899999
@@ -130,6 +130,7 @@ func (s State) String() string {
 func GetZLoop(digits []int) int64 {
 	var z int64 = 0
 
+	// var zs []int64
 	for i := 0; i < 14; i++ {
 		digit := digits[i]
 		step := steps[i]
@@ -142,8 +143,13 @@ func GetZLoop(digits []int) int64 {
 		w := int64(digit)
 		if x != w {
 			z = 26*z + w + step.b
+		} else {
+			// fmt.Printf("%2d match %d = %d a=%d b=%d \n", i, x, w, step.a, step.b)
 		}
+		// zs = append(zs, z)
 	}
+
+	// fmt.Printf("zs: %v\n", zs)
 
 	return z
 }
@@ -238,26 +244,66 @@ func RandomPlate() []int {
 }
 
 func main() {
-	digits, err := util.MapErr(strings.Split(os.Args[1], ""), strconv.Atoi)
-	if err != nil {
-		panic(err)
-	}
-	if len(digits) != 14 {
-		panic(len(digits))
-	}
-	z := GetZLoop(digits)
-	fmt.Printf("%v --> %d\n", digits, z)
-	return
+	/*
+		digits, err := util.MapErr(os.Args[1:], strconv.Atoi)
+		if err != nil {
+			panic(err)
+		}
+		if len(digits) != 14 {
+			panic(len(digits))
+		}
+		z := GetZLoop(digits)
+		fmt.Printf("%v --> %d\n", digits, z)
+		return
+	*/
 
-	lowestZ := int64(-1)
-	for i := 0; i < 100000000; i++ {
-		inp := RandomPlate()
-		z := GetZLoop(inp)
-		if lowestZ == -1 || z < lowestZ {
-			lowestZ = z
-			fmt.Printf("Lowest z: %v -> %d\n", inp, z)
+	var best []int
+	for d0 := 1; d0 <= 9; d0++ {
+		for d1 := 1; d1 <= 9; d1++ {
+			for d2 := 1; d2 <= 9; d2++ {
+				for d3 := 8; d3 <= 9; d3++ {
+					d4 := d3 - 7
+					d5 := 9
+					d6 := 9
+					d7 := 4
+					d8 := 9
+					d12 := 9
+					d13 := 8
+					for d9 := 1; d9 <= 9; d9++ {
+						for d10 := 1; d10 <= 9; d10++ {
+							for d11 := 1; d11 <= 9; d11++ {
+								input := []int{
+									d0, d1, d2, d3, d4, d5, d6,
+									d7, d8, d9, d10, d11, d12, d13,
+								}
+								if GetZLoop(input) == 0 {
+									fmt.Printf("got one: %v\n", best)
+									best = input
+								}
+							}
+						}
+					}
+				}
+			}
+			fmt.Printf("Completed d0,d1=%d,%d\n", d0, d1)
 		}
 	}
+	fmt.Printf("Best: %v\n", best)
+
+	/*
+		// lowestZ := int64(-1)
+		for i := 0; i < 1000000000; i++ {
+			inp := RandomPlate()
+			z := GetZLoop(inp)
+			if z == 0 {
+				fmt.Printf("%v -> %d\n", inp, z)
+			}
+			// if lowestZ == -1 || z < lowestZ {
+			// 	lowestZ = z
+			// 	fmt.Printf("Lowest z: %v -> %d\n", inp, z)
+			// }
+		}
+	*/
 
 	// linesText := util.ReadLines(os.Args[1])
 	// num, err := strconv.ParseUint(os.Args[2], 10, 64)
