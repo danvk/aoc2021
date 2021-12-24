@@ -16,12 +16,16 @@ type Step struct {
 	div bool
 }
 
+func (s Step) String() string {
+	return fmt.Sprintf("a: %-2d b: %-2d %v", s.a, s.b, s.div)
+}
+
 var steps = []Step{
 	{a: 14, b: 12},             // d0
 	{a: 11, b: 8},              // d1
 	{a: 11, b: 7},              // d2
 	{a: 14, b: 4},              // d3
-	{a: 14, b: 4, div: true},   // d4
+	{a: -11, b: 4, div: true},  // d4
 	{a: 12, b: 1},              // d5
 	{a: -1, b: 10, div: true},  // d6
 	{a: 10, b: 8},              // d7
@@ -303,7 +307,6 @@ func main() {
 	// if err != nil {
 	// 	panic(err)
 	// }
-
 	for i := 0; i < 100000; i++ {
 		var s1 State
 		inp := RandomPlate()
@@ -321,7 +324,7 @@ func main() {
 			fmt.Printf("Mismatch for input: %v %d != %d\n", inp, z1, z2)
 			return
 		} else {
-			fmt.Printf("Match!\n")
+			// fmt.Printf("Match!\n")
 		}
 	}
 
@@ -331,17 +334,23 @@ func main() {
 
 	// run program z=5387967764
 	// run steps   z=3958084764
-
 	/*
 		digits, err := util.MapErr(strings.Split(os.Args[2], ""), strconv.Atoi)
 		if err != nil {
 			panic(err)
 		}
+		if len(digits) != 14 {
+			panic(len(digits))
+		}
 
 		fmt.Printf("Line by line:\n")
 		state := State{}
 		state.input = digits
+		fmt.Printf("%8s  # %s\n", "(init)", state)
 		for _, line := range linesText {
+			if line[0:3] == "inp" {
+				fmt.Println()
+			}
 			state = RunInstruction(state, line)
 			fmt.Printf("%8s  # %s\n", line, state)
 		}
@@ -352,6 +361,7 @@ func main() {
 
 		state = State{}
 		state.input = digits
+		fmt.Printf("%8s  # %s\n", "(init)", state)
 		for i, step := range steps {
 			state = state.RunStep(step)
 			fmt.Printf("%2d: %s\n", i, state)
