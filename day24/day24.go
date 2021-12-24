@@ -36,6 +36,8 @@ var steps = []Step{
 	{a: -11, b: 9, div: true},  // d13
 }
 
+// 28692221693676 = too low
+// 28692994993698 = incorrect
 // 89999999999999 = too high
 // 900000000000000 = too high
 // 13579246899999
@@ -236,33 +238,55 @@ func RandomPlate() []int {
 }
 
 func main() {
-	linesText := util.ReadLines(os.Args[1])
+	digits, err := util.MapErr(strings.Split(os.Args[1], ""), strconv.Atoi)
+	if err != nil {
+		panic(err)
+	}
+	if len(digits) != 14 {
+		panic(len(digits))
+	}
+	z := GetZLoop(digits)
+	fmt.Printf("%v --> %d\n", digits, z)
+	return
+
+	lowestZ := int64(-1)
+	for i := 0; i < 100000000; i++ {
+		inp := RandomPlate()
+		z := GetZLoop(inp)
+		if lowestZ == -1 || z < lowestZ {
+			lowestZ = z
+			fmt.Printf("Lowest z: %v -> %d\n", inp, z)
+		}
+	}
+
+	// linesText := util.ReadLines(os.Args[1])
 	// num, err := strconv.ParseUint(os.Args[2], 10, 64)
 
 	// if err != nil {
 	// 	panic(err)
 	// }
-	for i := 0; i < 100000; i++ {
-		var s1 State
-		inp := RandomPlate()
-		s1.input = inp
-		z1 := GetZForState(s1, linesText)
-		// fmt.Printf("%v --> z=%d\n", s.input, z)
-		if z1 == 0 {
-			fmt.Printf("\n\n   WE HAVE A WINNER! %v\n\n", inp)
-		}
+	/*
+		for i := 0; i < 100000; i++ {
+			var s1 State
+			inp := RandomPlate()
+			s1.input = inp
+			z1 := GetZForState(s1, linesText)
+			// fmt.Printf("%v --> z=%d\n", s.input, z)
+			if z1 == 0 {
+				fmt.Printf("\n\n   WE HAVE A WINNER! %v\n\n", inp)
+			}
 
-		// var s2 State
-		// s2.input = inp
-		z2 := GetZLoop(inp)
-		if z1 != z2 {
-			fmt.Printf("Mismatch for input: %v %d != %d\n", inp, z1, z2)
-			return
-		} else {
-			// fmt.Printf("Match!\n")
+			// var s2 State
+			// s2.input = inp
+			z2 := GetZLoop(inp)
+			if z1 != z2 {
+				fmt.Printf("Mismatch for input: %v %d != %d\n", inp, z1, z2)
+				return
+			} else {
+				// fmt.Printf("Match!\n")
+			}
 		}
-	}
-
+	*/
 	// for n := num - 100; n <= num+10; n++ {
 	// 	fmt.Printf("%d --> z=%d\n", n, GetZ(n, linesText))
 	// }

@@ -94,6 +94,23 @@ y gets reset
 		z = 26 * z + w + step.b
 	}
 
+D0D1 2 3 4 5 6 7 8 910111213
+ 2 8 6 9 2 2 2 1 6 9 3 6 7 6 evaluates to zero!
+
+ d5 != d4 - 7
+ d6 == d5
+ d8 == d7 + 5
+ d9 != d8 + 8
+d10 != d9 - 3
+d11 != d10 + 7
+d13 == d12 - 1
+
+28692221693676 (too low)
+
+28692221693698 (max d13)
+28692991693698 (max d5, d6)
+28692994993698 (max d7, d8)  not correct
+
 ### Day 23
 
 Another challenging one. I'm glad I went overboard and wrote a very generic Dijkstra for day 15, it came in handy today. I wish I hadn't had a tricky bug in it, though!
