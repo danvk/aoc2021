@@ -165,6 +165,9 @@ d13=d12-1; these may as well be 98
 57592993882998
 57592994982998
 
+59692994994998
+16181994941598 = too high
+
 ### Day 23
 
 Another challenging one. I'm glad I went overboard and wrote a very generic Dijkstra for day 15, it came in handy today. I wish I hadn't had a tricky bug in it, though!
