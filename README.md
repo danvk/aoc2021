@@ -10,6 +10,8 @@ mod: All mods are modulo 26.
 div: All divs are divide by either 1 or 26.
 inp: All inputs are to `w`, and only `inp` writes to `w`.
 
+With all these mod 26s, I wonder if this is something alphabetical?
+
 This sequence is repeated 14 times:
 
 fn0:

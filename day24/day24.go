@@ -5,6 +5,7 @@ import (
 	"constraints"
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -169,6 +170,34 @@ func (s State) String() string {
 	)
 }
 
+func (s State) RunStep(step Step) State {
+	x, y, z := s.reg[0], s.reg[1], s.reg[2]
+	w := int64(s.input[0])
+	s.input = s.input[1:]
+
+	x = z % 26
+	if step.div {
+		z = z / 26
+	}
+	x += int64(step.a)
+	if x == w {
+		z *= 25
+		x = 0
+	} else {
+		z *= 26
+		x = 1
+	}
+	y = w + int64(step.b)
+	y = y * x
+	z += y
+
+	s.reg[0] = x
+	s.reg[1] = y
+	s.reg[2] = z
+	s.reg[3] = w
+	return s
+}
+
 func (s RangeState) RunInstruction(instr string) RangeState {
 	if len(instr) == 0 {
 		return s // blank lines are OK
@@ -262,7 +291,7 @@ func RandomPlate() []int {
 }
 
 func main() {
-	// linesText := util.ReadLines(os.Args[1])
+	linesText := util.ReadLines(os.Args[1])
 	// num, err := strconv.ParseUint(os.Args[2], 10, 64)
 
 	// if err != nil {
@@ -284,17 +313,31 @@ func main() {
 	// 	fmt.Printf("%d --> z=%d\n", n, GetZ(n, linesText))
 	// }
 
-	// digits, err := util.MapErr(strings.Split(os.Args[2], ""), strconv.Atoi)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	// run program z=5387967764
+	// run steps   z=3958084764
 
-	// state := State{}
-	// state.input = digits
+	digits, err := util.MapErr(strings.Split(os.Args[2], ""), strconv.Atoi)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Line by line:\n")
+	state := State{}
+	state.input = digits
+	for _, line := range linesText {
+		state = RunInstruction(state, line)
+		fmt.Printf("%8s  # %s\n", line, state)
+	}
+	// fmt.Printf("run program z=%d\n", GetZForState(state, linesText))
 	// fmt.Printf("%8s  # %s\n", "(init)", state)
 
-	// for _, line := range linesText {
-	// 	state = RunInstruction(state, line)
-	// 	fmt.Printf("%8s  # %s\n", line, state)
-	// }
+	fmt.Printf("\n\nStep by step:\n")
+
+	state = State{}
+	state.input = digits
+	for i, step := range steps {
+		state = state.RunStep(step)
+		fmt.Printf("%2d: %s\n", i, state)
+	}
+	fmt.Printf("run steps z=%d\n", state.reg[2])
 }
