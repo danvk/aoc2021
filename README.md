@@ -2,6 +2,10 @@
 
 ## Advent of Code
 
+### Day 24
+
+Valid plates seem quite rare! I generated a million random ones and didn't find a single valid plate. I'm guessing this has to be calculating some mathematical property, but primality would produce too many valid plates.
+
 ### Day 23
 
 Another challenging one. I'm glad I went overboard and wrote a very generic Dijkstra for day 15, it came in handy today. I wish I hadn't had a tricky bug in it, though!
