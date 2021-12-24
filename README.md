@@ -32,7 +32,6 @@ fn1:
     add y w
 
 		if x == w {
-			z *= 25
 			x=0
 		} else {
 			z *= 26
@@ -46,20 +45,32 @@ fn2:
 		mod x 26  # x = z % 26
 		div z 26  # z /= 26
 
- D0: +14, +12
- D1: +11, +8
- D3: +11, +7
- D4: +14, +4
- D5: /26, -11, +4
- D6: +12, +1
- D7: /26, -1, +10
- D8: +10, +8
- D9: /26, -3, +12
-D10: /26, -4, +10
-D11: /26, -13, +15
-D12: /26, -8, +4
-D13: +13, +10
-D14: /26, -11, +9
+The processing of each digit involves two numbers, and maybe a divide by 26:
+
+ D0:      +14, +12
+ D1:      +11,  +8
+ D2:      +11,  +7
+ D3:      +14,  +4               9
+ D4: /26, -11,  +4  #  d5=d4-7   2  d5=(d4+4)%26-11=d4-7
+ D5:      +12,  +1
+ D6: /26,  -1, +10  #  d6=d5     9  d6=(d5+1)%26-1 = d5
+ D7:      +10,  +8
+ D8: /26,  -3, +12  # d8=d7+5       d8=(d7+8)%26-3 = d7+5
+ D9: /26,  -4, +10  # d9=d8+8    54 d9=(d8+12)%26-4 = d8+8
+D10: /26, -13, +15  # d10=d9-3   21 d10=(d9+10)%26-13 = d9-3
+D11: /26,  -8,  +4  # d11=d10+7  98 d11=(d10+15)%26-8 = d10+7
+D12:      +13, +10               9
+D13: /26, -11,  +9  # d13=d12-1  8
+
+The second column of numbers is all positive.
+When there's a `/26`, the previous input's contribution to `z` is eliminated, except insofar as it could cause an `x==w` match.
+The values in the first column are all positive and >=10, unless there's a `/26`, in which case they're negative.
+
+The numbers that contribute to z are all the inputs, values in the second column and multiplying by 26. So how can you get a zero? The `x==w` cases at most let you drop terms.
+
+I think I want to hit all the x==w cases?
+
+So d5=d4-7
 
 ### Day 23
 

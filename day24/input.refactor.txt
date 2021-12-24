@@ -15,37 +15,52 @@ mul y x   # y=D2+8
 add z y   # x=1, y=D2+8, z=(D1+12)*26+D2+8 √
 
 inp w     # w=D3
-x=(z%26)  # x=((D1+12)*26+D2+8)%26
-add x 11  # x=11 + ((D1+12)*26+D2+8)%26
-fn1
-add y 7
-mul y x
-add z y
+x=(z%26)  # x=((D1+12)*26+D2+8)%26 = (D2+8)%26
+add x 11  # x=11 + (D2+8)%26
+fn1       # x=1, z=26*((D1+12)*26+D2+8)
+add y 7   # y=D3+7
+mul y x   # y=D3+7
+add z y   # x=1, y=D3+7, z=D3+7+26*((D1+12)*26+D2+8) ✓
+          # x=1, y=D3+7, z=D3+7 + 26*(D2+8 + 26*(D1+12))
 
 inp w     # w=D4
-x=(z%26)
-add x 14
-fn1
-add y 4
-mul y x
-add z y
+x=(z%26)  # x=D3+7
+add x 14  # x=14 + D3+7
+fn1       # x=1, z=26*(D3+7 + 26*(D2+8 + 26*(D1+12)))
+add y 4   # y=D4+4
+mul y x   # y=D4+4
+add z y   # x=1, y=d4+4, z=d4+4 + 26*(d3+7 + 26*(d2+8 + 26*(d1+12))) ✓
 
-inp w     # w=D5
-x=(z%26)
-z/=26
-add x -11
-fn1
-add y 4
-mul y x
-add z y
+inp w     # w=d5
+x=(z%26)  # x=(d4+4)%26
+z/=26     # z=d3+7 + 26*(d2+8 + 26*(d1+12))
+add x -11 # x=d4-7
+fn1       # d5=d4-7 ?
+          # yes: x=0, z=25*(d3+7 + 26*(d2+8 + 26*(d1+12)))
+          #  no: x=1, z=26*(d3+7 + 26*(d2+8 + 26*(d1+12)))
+add y 4   # y=d5+4
+mul y x   # yes: y=0
+          #  no: y=d5+4
+add z y   # yes: x=0, y=0,    z=d3+7 + 26*(d2+8 + 26*(d1+12))
+          #  no: x=1, y=d5+4, z=d5+4 + 26*(d3+7 + 26*(d2+8 + 26*(d1+12))) ✓
 
-inp w     # w=D6
-x=(z%26)
-add x 12
-fn1
-add y 1
-mul y x
-add z y
+# The "yes" case from D5:
+inp w     # w= d6
+x=(z%26)  # x= d3+7
+add x 12  # x= d3+19
+fn1       # x=1, z=26*(d3+7 + 26*(d2+8 + 26*(d1+12)))
+add y 1   # y=d6+1
+mul y x   # y=d6+1
+add z y   # x=1, y=d6+1, z=d6+1 + 26*(d3+7 + 26*(d2+8 + 26*(d1+12))) ✓
+
+# The "no" case from D5:
+inp w     # w= d6
+x=(z%26)  # x= d5+4
+add x 12  # x= d5+16
+fn1       # x=1, z=26*(d5+4 + 26*(d3+7 + 26*(d2+8 + 26*(d1+12))))
+add y 1   # y=
+mul y x   # y= d6+1
+add z y   # x=1, y=d6+1, z=d6+1 + 26*(d5+4 + 26*(d3+7 + 26*(d2+8 + 26*(d1+12))))
 
 inp w     # w=D7
 x=(z%26)
@@ -108,11 +123,12 @@ add y 10
 mul y x
 add z y
 
+# To get z=0, need either z=0 entering, or
 inp w     # w=D14
-x=(z%26)
-z/=26
-add x -11
-fn1
-add y 9
-mul y x
-add z y
+x=(z%26)  # x is 0..25
+z/=26     #
+add x -11 # x is -11..14
+fn1       # x=0 or 1, y=D14, z=z*(25 or 26)
+add y 9   # y=D14 + 9
+mul y x   # y=(D14 + 9) * (0 or 1)
+add z y   # z += y

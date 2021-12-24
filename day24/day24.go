@@ -17,26 +17,26 @@ type Step struct {
 }
 
 var steps = []Step{
-	{a: 14, b: 12},
-	{a: 11, b: 8},
-	{a: 11, b: 7},
-	{a: 14, b: 4},
-	{a: 14, b: 4, div: true},
-	{a: 12, b: 1},
-	{a: -1, b: 10, div: true},
-	{a: 10, b: 8},
-	{a: -3, b: 12, div: true},
-	{a: -4, b: 10, div: true},
-	{a: -13, b: 15, div: true},
-	{a: -8, b: 4, div: true},
-	{a: 13, b: 10},
-	{a: -11, b: 9, div: true},
+	{a: 14, b: 12},             // d0
+	{a: 11, b: 8},              // d1
+	{a: 11, b: 7},              // d2
+	{a: 14, b: 4},              // d3
+	{a: 14, b: 4, div: true},   // d4
+	{a: 12, b: 1},              // d5
+	{a: -1, b: 10, div: true},  // d6
+	{a: 10, b: 8},              // d7
+	{a: -3, b: 12, div: true},  // d8
+	{a: -4, b: 10, div: true},  // d9
+	{a: -13, b: 15, div: true}, // d10
+	{a: -8, b: 4, div: true},   // d11
+	{a: 13, b: 10},             // d12
+	{a: -11, b: 9, div: true},  // d13
 }
 
 // 89999999999999 = too high
 // 900000000000000 = too high
 // 13579246899999
-// 012345678901234
+// 01234567890123
 
 type State struct {
 	reg   [4]int64
@@ -181,7 +181,6 @@ func (s State) RunStep(step Step) State {
 	}
 	x += int64(step.a)
 	if x == w {
-		z *= 25
 		x = 0
 	} else {
 		z *= 26
@@ -282,6 +281,13 @@ func GetZForState(state State, lines []string) int64 {
 	return state.reg[2]
 }
 
+func GetZBySteps(state State) int64 {
+	for _, step := range steps {
+		state = state.RunStep(step)
+	}
+	return state.reg[2]
+}
+
 func RandomPlate() []int {
 	ns := make([]int, 14)
 	for i := 0; i < len(ns); i++ {
@@ -298,16 +304,26 @@ func main() {
 	// 	panic(err)
 	// }
 
-	// for i := 0; i < 100000; i++ {
-	// 	var s State
-	// 	inp := RandomPlate()
-	// 	s.input = inp
-	// 	z := GetZForState(s, linesText)
-	// 	// fmt.Printf("%v --> z=%d\n", s.input, z)
-	// 	if z == 0 {
-	// 		fmt.Printf("\n\n   WE HAVE A WINNER! %v\n\n", inp)
-	// 	}
-	// }
+	for i := 0; i < 100000; i++ {
+		var s1 State
+		inp := RandomPlate()
+		s1.input = inp
+		z1 := GetZForState(s1, linesText)
+		// fmt.Printf("%v --> z=%d\n", s.input, z)
+		if z1 == 0 {
+			fmt.Printf("\n\n   WE HAVE A WINNER! %v\n\n", inp)
+		}
+
+		var s2 State
+		s2.input = inp
+		z2 := GetZBySteps(s2)
+		if z1 != z2 {
+			fmt.Printf("Mismatch for input: %v %d != %d\n", inp, z1, z2)
+			return
+		} else {
+			fmt.Printf("Match!\n")
+		}
+	}
 
 	// for n := num - 100; n <= num+10; n++ {
 	// 	fmt.Printf("%d --> z=%d\n", n, GetZ(n, linesText))
@@ -316,28 +332,30 @@ func main() {
 	// run program z=5387967764
 	// run steps   z=3958084764
 
-	digits, err := util.MapErr(strings.Split(os.Args[2], ""), strconv.Atoi)
-	if err != nil {
-		panic(err)
-	}
+	/*
+		digits, err := util.MapErr(strings.Split(os.Args[2], ""), strconv.Atoi)
+		if err != nil {
+			panic(err)
+		}
 
-	fmt.Printf("Line by line:\n")
-	state := State{}
-	state.input = digits
-	for _, line := range linesText {
-		state = RunInstruction(state, line)
-		fmt.Printf("%8s  # %s\n", line, state)
-	}
-	// fmt.Printf("run program z=%d\n", GetZForState(state, linesText))
-	// fmt.Printf("%8s  # %s\n", "(init)", state)
+		fmt.Printf("Line by line:\n")
+		state := State{}
+		state.input = digits
+		for _, line := range linesText {
+			state = RunInstruction(state, line)
+			fmt.Printf("%8s  # %s\n", line, state)
+		}
+		// fmt.Printf("run program z=%d\n", GetZForState(state, linesText))
+		// fmt.Printf("%8s  # %s\n", "(init)", state)
 
-	fmt.Printf("\n\nStep by step:\n")
+		fmt.Printf("\n\nStep by step:\n")
 
-	state = State{}
-	state.input = digits
-	for i, step := range steps {
-		state = state.RunStep(step)
-		fmt.Printf("%2d: %s\n", i, state)
-	}
-	fmt.Printf("run steps z=%d\n", state.reg[2])
+		state = State{}
+		state.input = digits
+		for i, step := range steps {
+			state = state.RunStep(step)
+			fmt.Printf("%2d: %s\n", i, state)
+		}
+		fmt.Printf("run steps z=%d\n", state.reg[2])
+	*/
 }
