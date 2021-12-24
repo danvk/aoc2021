@@ -72,6 +72,28 @@ I think I want to hit all the x==w cases?
 
 So d5=d4-7
 
+Leaving the group for an input, we always have:
+
+x = 0 or 1
+y = 0 or input + step.b
+z = ???
+w = input
+
+z carries from one step to the next
+w gets reset (to the next input)
+x gets reset
+y gets reset
+
+  x=z%26
+	if step.div { z/=26 }
+	x += step.a
+	if x == w {
+		x = 0
+		y = 0
+	} else {
+		z = 26 * z + w + step.b
+	}
+
 ### Day 23
 
 Another challenging one. I'm glad I went overboard and wrote a very generic Dijkstra for day 15, it came in handy today. I wish I hadn't had a tricky bug in it, though!

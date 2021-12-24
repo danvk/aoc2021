@@ -2,7 +2,6 @@ package main
 
 import (
 	"aoc/util"
-	"constraints"
 	"fmt"
 	"math/rand"
 	"os"
@@ -11,8 +10,8 @@ import (
 )
 
 type Step struct {
-	a   int
-	b   int
+	a   int64
+	b   int64
 	div bool
 }
 
@@ -47,59 +46,11 @@ type State struct {
 	input []int
 }
 
-type Interval struct {
-	min, max int64
-}
-
-func (iv Interval) String() string {
-	if iv.min == iv.max {
-		return fmt.Sprintf("%d", iv.min)
-	}
-	return fmt.Sprintf("%d..%d", iv.min, iv.max)
-}
-
-func (iv *Interval) Add(other Interval) {
-	iv.min += other.min
-	iv.max += other.max
-}
-
-func min[T constraints.Integer](a, b T) T {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max[T constraints.Integer](a, b T) T {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func (iv *Interval) Mul(other Interval) {
-	a, b, c, d := iv.min*other.min, iv.min*other.max, iv.max*other.min, iv.max*other.max
-	iv.min = min(a, min(b, min(c, d)))
-	iv.max = max(a, max(b, max(c, d)))
-}
-
-type RangeState struct {
-	reg [4]Interval
-}
-
 var registers = map[string]int{
 	"x": 0,
 	"y": 1,
 	"z": 2,
 	"w": 3,
-}
-
-func (s *RangeState) GetValue(str string) Interval {
-	n, ok := registers[str]
-	if ok {
-		return s.reg[n]
-	}
-	return Interval{1, 9}
 }
 
 func (s *State) GetValue(str string) int64 {
@@ -175,83 +126,46 @@ func (s State) String() string {
 }
 
 func (s State) RunStep(step Step) State {
-	x, y, z := s.reg[0], s.reg[1], s.reg[2]
-	w := int64(s.input[0])
-	s.input = s.input[1:]
-
-	x = z % 26
+	z := s.reg[2]
+	x := z % 26
 	if step.div {
 		z = z / 26
 	}
-	x += int64(step.a)
-	if x == w {
-		x = 0
-	} else {
-		z *= 26
-		x = 1
+	x += step.a
+	w := int64(s.input[0])
+	s.input = s.input[1:]
+	if x != w {
+		z = 26*z + w + step.b
 	}
-	y = w + int64(step.b)
-	y = y * x
-	z += y
-
-	s.reg[0] = x
-	s.reg[1] = y
 	s.reg[2] = z
-	s.reg[3] = w
 	return s
-}
 
-func (s RangeState) RunInstruction(instr string) RangeState {
-	if len(instr) == 0 {
-		return s // blank lines are OK
-	}
+	/*
+		x, y, z := s.reg[0], s.reg[1], s.reg[2]
+		w := int64(s.input[0])
+		s.input = s.input[1:]
 
-	parts := strings.Split(instr, " ")
-	if len(parts) < 2 {
-		panic(instr)
-	}
-	cmd := parts[0]
-
-	n, ok := registers[parts[1]]
-	if !ok {
-		panic(instr)
-	}
-
-	if cmd == "inp" {
-		s.reg[n] = Interval{1, 9}
-		// (Consume input)
-		return s
-	}
-	if len(parts) < 3 {
-		panic(instr)
-	}
-
-	v := s.GetValue(parts[2])
-	switch cmd {
-	case "add":
-		s.reg[n].Add(v)
-	case "mul":
-		s.reg[n].Mul(v)
-	case "mod":
-		if v.min != 26 || v.max != 26 {
-			panic(v)
+		x = z % 26
+		if step.div {
+			z = z / 26
 		}
-		if s.reg[n].min >= 0 && s.reg[n].max <= 25 {
-			// no op
+		x += int64(step.a)
+		if x == w {
+			x = 0
 		} else {
-			s.reg[n].min = 0
-			s.reg[n].max = 25
+			z *= 26
+			x = 1
 		}
-	case "div":
-		// s.reg[n] /= v
-	case "eql":
-		// if s.reg[n] == v {
-		// 	s.reg[n] = 1
-		// } else {
-		// 	s.reg[n] = 0
-		// }
-	}
-	return s
+		y = w + int64(step.b)
+		y = y * x
+		z += y
+
+		s.reg[0] = x
+		s.reg[1] = y
+		s.reg[2] = z
+		s.reg[3] = w
+		return s
+	*/
 }
 
 func GetZ(n uint64, lines []string) int64 {
