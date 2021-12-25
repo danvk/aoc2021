@@ -23,7 +23,29 @@ func MoveEast(g map[c.Coord]rune, max c.Coord) bool {
 	for p, cuc := range g {
 		if cuc == '>' {
 			x, y := p.X, p.Y
-			next := c.Coord{X: (x + 1) % maxX, Y: y}
+			next := c.Coord{X: (x + 1) % (maxX + 1), Y: y}
+			if _, ok := g[next]; !ok {
+				toMove[p] = next
+			}
+		}
+	}
+
+	// Make the moves
+	for cur, next := range toMove {
+		g[next] = g[cur]
+		delete(g, cur)
+	}
+
+	return len(toMove) > 0
+}
+
+func MoveSouth(g map[c.Coord]rune, max c.Coord) bool {
+	maxY := max.Y
+	toMove := map[c.Coord]c.Coord{}
+	for p, cuc := range g {
+		if cuc == 'v' {
+			x, y := p.X, p.Y
+			next := c.Coord{X: x, Y: (y + 1) % (maxY + 1)}
 			if _, ok := g[next]; !ok {
 				toMove[p] = next
 			}
@@ -73,9 +95,23 @@ func main() {
 			maxY = y
 		}
 	}
+
 	max := c.Coord{X: maxX, Y: maxY}
 	fmt.Printf("max: %s\n", max)
-	fmt.Printf("%s\n", String(g, max))
-	MoveEast(g, max)
-	fmt.Printf("\n\nEast:\n%s\n", String(g, max))
+	fmt.Printf("Init:\n%s\n\n", String(g, max))
+	step := 1
+	for {
+		movedE := MoveEast(g, max)
+		movedS := MoveSouth(g, max)
+		if !movedE && !movedS {
+			break
+		}
+		// fmt.Printf("Step %d:\n%s\n\n", step, String(g, max))
+		step++
+	}
+
+	fmt.Printf("Stopped after %d steps\n", step)
+	// fmt.Printf("%s\n", String(g, max))
+
+	// fmt.Printf("\n\nStep 1:\n%s\n", String(g, max))
 }
